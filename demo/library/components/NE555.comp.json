@@ -1,0 +1,11 @@
+{
+  "description": "",
+  "footprint_refs": [],
+  "format_version": 1,
+  "id": "NE555",
+  "manufacturer": "Generic",
+  "parameters": {},
+  "part_number": "NE555P",
+  "symbol_ref": "symbols/NE555.sym.json",
+  "tags": []
+}

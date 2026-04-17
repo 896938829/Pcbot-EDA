@@ -1,0 +1,87 @@
+{
+  "bbox_nm": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "format_version": 1,
+  "graphic_svg_ref": "",
+  "id": "NE555",
+  "metadata": {},
+  "name": "NE555",
+  "pins": [
+    {
+      "dir": "left",
+      "name": "GND",
+      "number": "1",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "dir": "left",
+      "name": "TRIG",
+      "number": "2",
+      "pos": [
+        0,
+        2000000
+      ]
+    },
+    {
+      "dir": "right",
+      "name": "OUT",
+      "number": "3",
+      "pos": [
+        10000000,
+        2000000
+      ]
+    },
+    {
+      "dir": "up",
+      "name": "RST",
+      "number": "4",
+      "pos": [
+        5000000,
+        10000000
+      ]
+    },
+    {
+      "dir": "right",
+      "name": "CTRL",
+      "number": "5",
+      "pos": [
+        10000000,
+        6000000
+      ]
+    },
+    {
+      "dir": "left",
+      "name": "THR",
+      "number": "6",
+      "pos": [
+        0,
+        4000000
+      ]
+    },
+    {
+      "dir": "left",
+      "name": "DIS",
+      "number": "7",
+      "pos": [
+        0,
+        6000000
+      ]
+    },
+    {
+      "dir": "down",
+      "name": "VCC",
+      "number": "8",
+      "pos": [
+        5000000,
+        0
+      ]
+    }
+  ]
+}

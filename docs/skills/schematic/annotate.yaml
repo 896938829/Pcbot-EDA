@@ -1,0 +1,16 @@
+name: schematic.annotate
+description: 为 reference 以 "?" 结尾的元件自动编号（例如 R? -> R1 / R2）。
+triggers:
+  - 新放置的元件还没编号
+params:
+  path: 原理图路径（必填）
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.annotate
+    params:
+      path: "demo/led_blink.sch.json"
+common_errors:
+  - code: SYSTEM_ERROR
+    when: "写文件失败"

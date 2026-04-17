@@ -1,0 +1,14 @@
+name: skills.list
+description: 列出全部可用 Skills 名称。
+triggers:
+  - AI 启动首次调用前自我介绍
+params: {}
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: skills.list
+    params: {}
+common_errors:
+  - code: SYSTEM_ERROR
+    when: "docs/skills 目录不可读"

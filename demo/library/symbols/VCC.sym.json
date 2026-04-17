@@ -1,0 +1,24 @@
+{
+  "bbox_nm": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "format_version": 1,
+  "graphic_svg_ref": "",
+  "id": "VCC",
+  "metadata": {},
+  "name": "VCC",
+  "pins": [
+    {
+      "dir": "up",
+      "name": "VCC",
+      "number": "1",
+      "pos": [
+        0,
+        0
+      ]
+    }
+  ]
+}

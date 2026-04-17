@@ -1,0 +1,33 @@
+{
+  "bbox_nm": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "format_version": 1,
+  "graphic_svg_ref": "",
+  "id": "R-10k",
+  "metadata": {},
+  "name": "R-10k",
+  "pins": [
+    {
+      "dir": "left",
+      "name": "1",
+      "number": "1",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "dir": "right",
+      "name": "2",
+      "number": "2",
+      "pos": [
+        4000000,
+        0
+      ]
+    }
+  ]
+}

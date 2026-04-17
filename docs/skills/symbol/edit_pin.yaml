@@ -1,0 +1,25 @@
+name: symbol.edit_pin
+description: 编辑或新增符号的一根引脚。
+triggers:
+  - 调整引脚位置 / 方向 / 名称
+  - 把占位符号补全
+params:
+  path: "*.sym.json 路径（必填）"
+  number: 引脚编号（必填）
+  name: 引脚名
+  pos: "[x_nm, y_nm]"
+  dir: "left/right/up/down"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: symbol.edit_pin
+    params:
+      path: "demo/library/symbols/LED.sym.json"
+      number: "1"
+      name: "A"
+      pos: [0, 0]
+      dir: "left"
+common_errors:
+  - code: USER_ERROR
+    when: "path 或 number 缺失"

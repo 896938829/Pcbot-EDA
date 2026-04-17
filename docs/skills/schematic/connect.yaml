@@ -1,0 +1,22 @@
+name: schematic.connect
+description: 在原理图中连接若干引脚到同一网络。网络不存在则新建。
+triggers:
+  - 接电源/地/信号
+params:
+  path: 原理图路径（必填）
+  net: 网络名（空则自动生成 Nx）
+  pins: "[\"U1.3\", \"R1.2\"] 形式的引脚引用列表（必填）"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.connect
+    params:
+      path: "demo/led_blink.sch.json"
+      net: "VCC"
+      pins: ["U1.8", "R1.1"]
+common_errors:
+  - code: USER_ERROR
+    when: "pins 为空或格式错误"
+  - code: USER_ERROR
+    when: "引用的 placement 不存在"

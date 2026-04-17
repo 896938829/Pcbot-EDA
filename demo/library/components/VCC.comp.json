@@ -1,0 +1,13 @@
+{
+  "description": "VCC power port",
+  "footprint_refs": [],
+  "format_version": 1,
+  "id": "VCC",
+  "manufacturer": "Generic",
+  "parameters": {},
+  "part_number": "VCC-port",
+  "symbol_ref": "symbols/VCC.sym.json",
+  "tags": [
+    "power"
+  ]
+}

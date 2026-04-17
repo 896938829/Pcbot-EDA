@@ -1,0 +1,31 @@
+name: library.add_component
+description: 向元件库写入一个元件条目（*.comp.json），关联符号与封装。
+triggers:
+  - 新增可下单料号
+  - 已有符号需要绑定厂商信息
+params:
+  lib_root: 库目录路径（必填）
+  id: 元件 id（必填）
+  manufacturer: 厂商
+  part_number: 料号
+  symbol_ref: 符号相对路径
+  footprint_refs: 封装引用列表
+  parameters: 电气参数字典
+  tags: 标签列表
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: library.add_component
+    params:
+      lib_root: "demo/library"
+      id: "R-10k-0603"
+      manufacturer: "Generic"
+      part_number: "RC0603JR-0710KL"
+      symbol_ref: "symbols/Resistor.sym.json"
+      parameters:
+        value: "10k"
+        tolerance: "5%"
+common_errors:
+  - code: USER_ERROR
+    when: "id 为空"

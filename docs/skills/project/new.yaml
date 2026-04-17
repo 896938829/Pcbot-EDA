@@ -1,0 +1,21 @@
+name: project.new
+description: 在指定路径创建新工程（*.pcbproj）。
+triggers:
+  - 开始新设计，尚无 .pcbproj 文件时
+  - e2e smoke 入口
+params:
+  path: 工程文件绝对或相对路径（必填）
+  name: 显示名；省略则用文件基名
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: project.new
+    params:
+      path: "demo/led_blink.pcbproj"
+      name: "LED Blink"
+common_errors:
+  - code: USER_ERROR
+    when: "path 为空"
+  - code: SYSTEM_ERROR
+    when: "目录不可写"

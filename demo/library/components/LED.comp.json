@@ -1,0 +1,16 @@
+{
+  "description": "Red 0603 LED",
+  "footprint_refs": [],
+  "format_version": 1,
+  "id": "LED",
+  "manufacturer": "Generic",
+  "parameters": {
+    "color": "red",
+    "vf": "2.0V"
+  },
+  "part_number": "LED-0603-RED",
+  "symbol_ref": "symbols/LED.sym.json",
+  "tags": [
+    "led"
+  ]
+}

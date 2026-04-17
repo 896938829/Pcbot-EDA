@@ -1,0 +1,33 @@
+{
+  "bbox_nm": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "format_version": 1,
+  "graphic_svg_ref": "",
+  "id": "LED",
+  "metadata": {},
+  "name": "LED",
+  "pins": [
+    {
+      "dir": "left",
+      "name": "A",
+      "number": "1",
+      "pos": [
+        0,
+        0
+      ]
+    },
+    {
+      "dir": "right",
+      "name": "K",
+      "number": "2",
+      "pos": [
+        2000000,
+        0
+      ]
+    }
+  ]
+}

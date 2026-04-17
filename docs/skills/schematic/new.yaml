@@ -1,0 +1,17 @@
+name: schematic.new
+description: 创建新原理图（*.sch.json），自动建立 p1 主页面。
+triggers:
+  - project.new 之后
+params:
+  path: "*.sch.json 路径（必填）"
+  id: 原理图 id（可选）
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.new
+    params:
+      path: "demo/led_blink.sch.json"
+common_errors:
+  - code: USER_ERROR
+    when: "path 为空"

@@ -1,0 +1,27 @@
+name: symbol.create
+description: 在指定路径创建或覆盖一个符号文件（*.sym.json）。
+triggers:
+  - 需要不经库目录直接写一个符号
+params:
+  path: "*.sym.json 路径（必填）"
+  id: 符号 id（必填）
+  name: 显示名
+  pins: 引脚数组
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: symbol.create
+    params:
+      path: "demo/scratch/Resistor.sym.json"
+      id: "Resistor"
+      pins:
+        - number: "1"
+          pos: [0, 0]
+          dir: "left"
+        - number: "2"
+          pos: [2540000, 0]
+          dir: "right"
+common_errors:
+  - code: USER_ERROR
+    when: "path 为空"

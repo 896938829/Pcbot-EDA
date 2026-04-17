@@ -1,3 +1,20 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# AI intermediate files (transient)
+.pcbot/last-run.json
+.pcbot/commit-msg
+
+# diagnostics.jsonl is project quality history: keep in git
+!.pcbot/diagnostics.jsonl
+
+# Library index (rebuildable from JSON sources)
+*.pcbotlib.sqlite
+.pcbotlib.sqlite
+
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+*.swp
+*.bak

@@ -1,0 +1,16 @@
+{
+  "description": "",
+  "footprint_refs": [],
+  "format_version": 1,
+  "id": "C-10uF",
+  "manufacturer": "Generic",
+  "parameters": {
+    "value": "10uF",
+    "voltage": "25V"
+  },
+  "part_number": "CAP0603-10uF",
+  "symbol_ref": "symbols/C-10uF.sym.json",
+  "tags": [
+    "capacitor"
+  ]
+}

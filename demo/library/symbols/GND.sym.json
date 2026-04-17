@@ -1,0 +1,24 @@
+{
+  "bbox_nm": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "format_version": 1,
+  "graphic_svg_ref": "",
+  "id": "GND",
+  "metadata": {},
+  "name": "GND",
+  "pins": [
+    {
+      "dir": "down",
+      "name": "GND",
+      "number": "1",
+      "pos": [
+        0,
+        0
+      ]
+    }
+  ]
+}

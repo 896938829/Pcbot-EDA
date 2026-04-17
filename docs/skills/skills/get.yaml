@@ -1,0 +1,18 @@
+name: skills.get
+description: 按名称取单个 Skills YAML 内容。
+triggers:
+  - 需要某命令的详细参数说明
+params:
+  name: "命名空间.方法，如 schematic.connect"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: skills.get
+    params:
+      name: "schematic.connect"
+common_errors:
+  - code: USER_ERROR
+    when: "name 不符合 <ns>.<method> 格式"
+  - code: USER_ERROR
+    when: "对应 YAML 不存在"

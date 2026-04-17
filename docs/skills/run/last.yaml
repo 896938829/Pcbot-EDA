@@ -1,0 +1,16 @@
+name: run.last
+description: 读取 .pcbot/last-run.json，用于 AI 会话中断后恢复上次上下文。
+triggers:
+  - 上次调用后换了新会话，需要知道上一步结果
+params:
+  project_root: 工程根目录（必填）
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: run.last
+    params:
+      project_root: "demo"
+common_errors:
+  - code: USER_ERROR
+    when: "project_root 缺失或 .pcbot/last-run.json 不存在"

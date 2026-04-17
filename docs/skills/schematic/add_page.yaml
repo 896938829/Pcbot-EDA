@@ -1,0 +1,21 @@
+name: schematic.add_page
+description: 给原理图加一张新页面。
+triggers:
+  - 一张图放不下
+params:
+  path: "*.sch.json 路径（必填）"
+  page_id: 新页面 id（必填）
+  name: 显示名
+  size_nm: "[w_nm, h_nm]"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.add_page
+    params:
+      path: "demo/led_blink.sch.json"
+      page_id: "p2"
+      name: "Power"
+common_errors:
+  - code: USER_ERROR
+    when: "page_id 已存在"

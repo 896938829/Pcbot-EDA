@@ -1,0 +1,16 @@
+{
+  "description": "",
+  "footprint_refs": [],
+  "format_version": 1,
+  "id": "R-330",
+  "manufacturer": "Generic",
+  "parameters": {
+    "tolerance": "5%",
+    "value": "330"
+  },
+  "part_number": "RC0603-330",
+  "symbol_ref": "symbols/R-330.sym.json",
+  "tags": [
+    "resistor"
+  ]
+}

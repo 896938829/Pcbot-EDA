@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://bpcbotm1main"]
+
+[ext_resource type="Script" path="res://Runtime/ui/main_window.gd" id="1_main"]
+[ext_resource type="Script" path="res://Runtime/ui/schematic_view.gd" id="2_view"]
+
+[node name="MainWindow" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_main")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Toolbar" type="HBoxContainer" parent="VBox"]
+custom_minimum_size = Vector2(0, 32)
+
+[node name="OpenBtn" type="Button" parent="VBox/Toolbar"]
+text = "打开工程"
+
+[node name="SchematicView" type="Control" parent="VBox"]
+size_flags_vertical = 3
+script = ExtResource("2_view")
+
+[node name="BG" type="ColorRect" parent="VBox/SchematicView"]
+color = Color(0.08, 0.09, 0.12, 1)
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Status" type="Label" parent="VBox"]
+custom_minimum_size = Vector2(0, 24)
+text = "Pcbot"

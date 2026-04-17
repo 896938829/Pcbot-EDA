@@ -1,0 +1,20 @@
+name: check.basic
+description: 基础自检（未连接元件、悬空网络、空原理图）。违例追加到 .pcbot/diagnostics.jsonl。
+triggers:
+  - 每次修改完原理图后自检
+  - commit 前
+params:
+  schematic: 原理图路径（必填）
+  project_root: 工程根目录（可选；默认为 schematic 所在目录）
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: check.basic
+    params:
+      schematic: "demo/led_blink.sch.json"
+common_errors:
+  - code: RULE_VIOLATION
+    when: "有规则违例"
+  - code: USER_ERROR
+    when: "schematic 缺失"

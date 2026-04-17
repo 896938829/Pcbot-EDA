@@ -1,0 +1,21 @@
+name: symbol.export_svg
+description: 从符号生成最小可读 SVG（矩形轮廓 + 引脚点 + 名称）。
+triggers:
+  - 需要为外部工具导出符号图形
+params:
+  path: "符号文件 *.sym.json（必填）"
+  svg_path: "输出 SVG 路径（必填）"
+  viewbox_mm: "[x, y, w, h]"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: symbol.export_svg
+    params:
+      path: "demo/library/symbols/LED.sym.json"
+      svg_path: "demo/library/symbols/LED.sym.svg"
+common_errors:
+  - code: USER_ERROR
+    when: "路径参数缺失"
+  - code: SYSTEM_ERROR
+    when: "写 SVG 失败"

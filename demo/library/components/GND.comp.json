@@ -1,0 +1,13 @@
+{
+  "description": "Ground port",
+  "footprint_refs": [],
+  "format_version": 1,
+  "id": "GND",
+  "manufacturer": "Generic",
+  "parameters": {},
+  "part_number": "GND-port",
+  "symbol_ref": "symbols/GND.sym.json",
+  "tags": [
+    "ground"
+  ]
+}

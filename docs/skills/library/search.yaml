@@ -1,0 +1,21 @@
+name: library.search
+description: 按关键字搜索元件库。
+triggers:
+  - 需要定位某料号或厂商
+  - 按描述找元件
+params:
+  lib_root: 库目录（必填或给 project）
+  query: 关键字（必填）
+  field: "可选：id / part_number / manufacturer / description"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: library.search
+    params:
+      lib_root: "demo/library"
+      query: "10k"
+      field: "part_number"
+common_errors:
+  - code: USER_ERROR
+    when: "query 为空"

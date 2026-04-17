@@ -1,0 +1,16 @@
+{
+  "description": "",
+  "footprint_refs": [],
+  "format_version": 1,
+  "id": "R-10k",
+  "manufacturer": "Generic",
+  "parameters": {
+    "tolerance": "5%",
+    "value": "10k"
+  },
+  "part_number": "RC0603-10k",
+  "symbol_ref": "symbols/R-10k.sym.json",
+  "tags": [
+    "resistor"
+  ]
+}

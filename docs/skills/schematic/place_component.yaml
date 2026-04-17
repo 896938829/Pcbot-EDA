@@ -1,0 +1,28 @@
+name: schematic.place_component
+description: 在原理图放置一个元件实例。
+triggers:
+  - 把元件拖到画布上
+  - 填充最小电路
+params:
+  path: 原理图路径（必填）
+  page_id: 页面 id（默认 p1）
+  component_ref: 库元件 id（必填）
+  reference: 位号，如 R1 / U1（必填）
+  pos_nm: "[x_nm, y_nm]"
+  rotation_deg: 旋转角（0/90/180/270）
+  mirror: 是否镜像
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.place_component
+    params:
+      path: "demo/led_blink.sch.json"
+      component_ref: "LED"
+      reference: "D1"
+      pos_nm: [50000000, 30000000]
+common_errors:
+  - code: USER_ERROR
+    when: "reference 重复"
+  - code: USER_ERROR
+    when: "page_id 不存在"

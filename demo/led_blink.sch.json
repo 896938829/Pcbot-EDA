@@ -1,0 +1,175 @@
+{
+  "format_version": 1,
+  "id": "led_blink",
+  "nets": [
+    {
+      "class_type": "",
+      "id": "N1",
+      "name": "VCC",
+      "pins": [
+        "R1.1",
+        "U1.4",
+        "U1.8",
+        "VCC1.1"
+      ]
+    },
+    {
+      "class_type": "",
+      "id": "N2",
+      "name": "GND",
+      "pins": [
+        "C1.2",
+        "D1.2",
+        "GND1.1",
+        "U1.1"
+      ]
+    },
+    {
+      "class_type": "",
+      "id": "N3",
+      "name": "DISCHARGE",
+      "pins": [
+        "R1.2",
+        "R2.1",
+        "U1.7"
+      ]
+    },
+    {
+      "class_type": "",
+      "id": "N4",
+      "name": "TIMING",
+      "pins": [
+        "C1.1",
+        "R2.2",
+        "U1.2",
+        "U1.6"
+      ]
+    },
+    {
+      "class_type": "",
+      "id": "N5",
+      "name": "OUT",
+      "pins": [
+        "R3.1",
+        "U1.3"
+      ]
+    },
+    {
+      "class_type": "",
+      "id": "N6",
+      "name": "LED_A",
+      "pins": [
+        "D1.1",
+        "R3.2"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "id": "p1",
+      "name": "Main",
+      "size_nm": [
+        297000000,
+        210000000
+      ]
+    }
+  ],
+  "placements": [
+    {
+      "component_ref": "NE555",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        100000000,
+        80000000
+      ],
+      "reference": "U1",
+      "rotation_deg": 0,
+      "uid": "pl1"
+    },
+    {
+      "component_ref": "R-10k",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        140000000,
+        40000000
+      ],
+      "reference": "R1",
+      "rotation_deg": 0,
+      "uid": "pl2"
+    },
+    {
+      "component_ref": "R-10k",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        140000000,
+        70000000
+      ],
+      "reference": "R2",
+      "rotation_deg": 0,
+      "uid": "pl3"
+    },
+    {
+      "component_ref": "C-10uF",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        80000000,
+        100000000
+      ],
+      "reference": "C1",
+      "rotation_deg": 0,
+      "uid": "pl4"
+    },
+    {
+      "component_ref": "R-330",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        170000000,
+        90000000
+      ],
+      "reference": "R3",
+      "rotation_deg": 0,
+      "uid": "pl5"
+    },
+    {
+      "component_ref": "LED",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        200000000,
+        90000000
+      ],
+      "reference": "D1",
+      "rotation_deg": 0,
+      "uid": "pl6"
+    },
+    {
+      "component_ref": "VCC",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        120000000,
+        20000000
+      ],
+      "reference": "VCC1",
+      "rotation_deg": 0,
+      "uid": "pl7"
+    },
+    {
+      "component_ref": "GND",
+      "mirror": false,
+      "page_id": "p1",
+      "pos_nm": [
+        120000000,
+        140000000
+      ],
+      "reference": "GND1",
+      "rotation_deg": 0,
+      "uid": "pl8"
+    }
+  ]
+}
