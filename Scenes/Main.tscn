@@ -15,17 +15,22 @@ anchor_bottom = 1.0
 [node name="Toolbar" type="HBoxContainer" parent="VBox"]
 custom_minimum_size = Vector2(0, 32)
 
+[node name="NewBtn" type="Button" parent="VBox/Toolbar"]
+text = "新建工程"
+
 [node name="OpenBtn" type="Button" parent="VBox/Toolbar"]
 text = "打开工程"
+
+[node name="DemoBtn" type="Button" parent="VBox/Toolbar"]
+text = "载入 Demo"
 
 [node name="SchematicView" type="Control" parent="VBox"]
 size_flags_vertical = 3
 script = ExtResource("2_view")
 
-[node name="BG" type="ColorRect" parent="VBox/SchematicView"]
-color = Color(0.08, 0.09, 0.12, 1)
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="Info" type="Label" parent="VBox"]
+custom_minimum_size = Vector2(0, 60)
+text = ""
 
 [node name="Status" type="Label" parent="VBox"]
 custom_minimum_size = Vector2(0, 24)

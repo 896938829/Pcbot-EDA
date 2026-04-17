@@ -46,6 +46,7 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.08, 0.09, 0.12))
 	_draw_grid()
 	if _schematic == null:
 		draw_string(get_theme_default_font(), Vector2(20, 20), "无原理图载入", HORIZONTAL_ALIGNMENT_LEFT, -1, 14)
