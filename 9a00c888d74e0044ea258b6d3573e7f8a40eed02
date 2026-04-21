@@ -1,0 +1,33 @@
+Runtime/io/svg.gd
+  60dc292f8685bcc2 28-29,39-45,52,75,77,79-91,95-169
+tests/lightweight_runner.gd
+  60dc292f8685bcc2 14
+tests/gut/test_all_suites.gd
+  60dc292f8685bcc2 46-49
+Runtime/modules/symbol/commands.gd
+  60dc292f8685bcc2 74-76
+tests/unit/svg_export_test.gd
+  60dc292f8685bcc2 1-97
+Runtime/ui/schematic_view.gd
+  60dc292f8685bcc2 3-4,8,11-13,25-26,30-34,38-48,103-104,107-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "9a00c888d74e0044ea258b6d3573e7f8a40eed02",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 262,
+      "total_deletions": 27,
+      "accepted_lines": 262,
+      "overriden_lines": 0
+    }
+  }
+}
