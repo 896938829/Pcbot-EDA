@@ -1,0 +1,31 @@
+tests/lightweight_runner.gd
+  60dc292f8685bcc2 21
+tests/gut/test_all_suites.gd
+  60dc292f8685bcc2 72-75
+cli/main.gd
+  60dc292f8685bcc2 62-63,65-73
+tests/integration/cli_stdin_test.gd
+  60dc292f8685bcc2 1-102
+docs/skills/run/last.yaml
+  60dc292f8685bcc2 17-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "8d180404f431a4abf4f976d150205345965a7510",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 140,
+      "total_deletions": 4,
+      "accepted_lines": 138,
+      "overriden_lines": 0
+    }
+  }
+}
