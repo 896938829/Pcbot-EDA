@@ -1,0 +1,29 @@
+docs/conventions/代码规范.md
+  60dc292f8685bcc2 227,229,233-243
+CLAUDE.md
+  60dc292f8685bcc2 47-50,53-54,57,70-83
+tools/fmt.sh
+  60dc292f8685bcc2 1-12
+tools/fmt_check.sh
+  60dc292f8685bcc2 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "b2185f7c3637c0bb93ae952c470a5a08b3bb8434",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 59,
+      "total_deletions": 7,
+      "accepted_lines": 59,
+      "overriden_lines": 0
+    }
+  }
+}
