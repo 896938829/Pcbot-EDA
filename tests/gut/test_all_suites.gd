@@ -43,6 +43,10 @@ func test_component_symbol() -> void:
 	_run_suite("res://tests/unit/component_symbol_test.gd")
 
 
+func test_svg_export() -> void:
+	_run_suite("res://tests/unit/svg_export_test.gd")
+
+
 func test_schematic() -> void:
 	_run_suite("res://tests/unit/schematic_test.gd")
 

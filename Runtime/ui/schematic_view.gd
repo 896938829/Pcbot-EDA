@@ -1,12 +1,16 @@
 extends Control
 
-## 原理图只读视图：符号（矩形+文字代替）、网络连线（以放置中心到中心直线近似）。
+## 原理图只读视图：符号（SVG 纹理优先，回退矩形）、网络连线（中心到中心直线近似）。
+## M1.1：SVG 渲染走 SvgIO.render_symbol → ImageTexture 缓存。
 ## M1 不做 UI 编辑，所有编辑走 CLI。
 
 const WORLD_PER_NM: float = 1.0 / 10000.0  ## 10000 nm = 1 world unit
+const TEXTURE_ZOOM_THRESHOLD: float = 0.4  ## 缩放低于此阈值时回退矩形，避免百元件全纹理绘制卡顿
 
 var _schematic: Schematic
-var _symbol_cache: Dictionary = {}
+var _symbol_cache: Dictionary = {}      ## id → sym dict
+var _texture_cache: Dictionary = {}     ## id → ImageTexture（无纹理则不入）
+var _bbox_cache: Dictionary = {}        ## id → Rect2 in mm（用于纹理缩放定位）
 var _lib_root: String = ""
 var _zoom: float = 1.0
 var _pan: Vector2 = Vector2.ZERO
@@ -18,12 +22,30 @@ func set_schematic(s: Schematic, lib_root: String) -> void:
 	_schematic = s
 	_lib_root = lib_root
 	_symbol_cache.clear()
+	_texture_cache.clear()
+	_bbox_cache.clear()
 	if DirAccess.dir_exists_absolute(lib_root):
 		for path in ProjectFs.walk_files(lib_root, ".sym.json"):
 			var d = JsonStable.read_file(path)
-			if d != null:
-				_symbol_cache[str(d.get("id", ""))] = d
+			if d == null:
+				continue
+			var id_s := str(d.get("id", ""))
+			_symbol_cache[id_s] = d
+			_load_symbol_texture(id_s, d)
 	queue_redraw()
+
+
+func _load_symbol_texture(id_s: String, sym_dict: Dictionary) -> void:
+	var sym := ComponentSymbol.from_dict(sym_dict)
+	var rendered: Dictionary = SvgIO.render_symbol(sym)
+	var svg_str: String = SvgIO.svg_to_string(rendered["viewbox"], rendered["shapes"])
+	var img := Image.new()
+	var err := img.load_svg_from_buffer(svg_str.to_utf8_buffer(), 4.0)
+	if err != OK:
+		return
+	_texture_cache[id_s] = ImageTexture.create_from_image(img)
+	var vb: Array = rendered["viewbox"]
+	_bbox_cache[id_s] = Rect2(float(vb[0]), float(vb[1]), float(vb[2]), float(vb[3]))
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -78,13 +100,38 @@ func _draw_grid() -> void:
 
 func _draw_placements() -> void:
 	var font := get_theme_default_font()
+	## mm → 像素的换算（沿用 nm 路径）：mm → nm × WORLD_PER_NM × _zoom
+	var mm_to_px: float = 1_000_000.0 * WORLD_PER_NM * _zoom
 	for pl in _schematic.placements:
 		var pos: Array = pl.get("pos_nm", [0, 0])
-		var p := _nm_to_px(Vector2i(int(pos[0]), int(pos[1])))
-		var half: float = 40.0 * _zoom
-		var rect := Rect2(p - Vector2(half, half), Vector2(half * 2, half * 2))
-		draw_rect(rect, Color(0.15, 0.45, 0.75), false, 2.0)
-		draw_string(font, p + Vector2(-half, -half - 4), str(pl.get("reference", "")), HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		var center := _nm_to_px(Vector2i(int(pos[0]), int(pos[1])))
+		var ref: String = str(pl.get("reference", ""))
+		var comp_id: String = str(pl.get("component_id", ""))
+		var sym_id := _symbol_id_for_component(comp_id)
+		var tex: ImageTexture = _texture_cache.get(sym_id, null) if sym_id != "" else null
+		var bbox_mm: Rect2 = _bbox_cache.get(sym_id, Rect2()) if sym_id != "" else Rect2()
+		if tex != null and _zoom >= TEXTURE_ZOOM_THRESHOLD and bbox_mm.size.x > 0:
+			var w: float = bbox_mm.size.x * mm_to_px
+			var h: float = bbox_mm.size.y * mm_to_px
+			var dst := Rect2(center - Vector2(w * 0.5, h * 0.5), Vector2(w, h))
+			draw_texture_rect(tex, dst, false)
+			draw_string(font, dst.position + Vector2(0, -4), ref, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		else:
+			var half: float = 40.0 * _zoom
+			var rect := Rect2(center - Vector2(half, half), Vector2(half * 2, half * 2))
+			draw_rect(rect, Color(0.15, 0.45, 0.75), false, 2.0)
+			draw_string(font, center + Vector2(-half, -half - 4), ref, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+
+
+func _symbol_id_for_component(component_id: String) -> String:
+	## 简化映射：component_id 与 symbol_id 同名（demo 现状）。M2 加 component → symbol_ref 解析。
+	if _symbol_cache.has(component_id):
+		return component_id
+	## 兜底：扫一遍找名字匹配（小库可接受）
+	for id_s in _symbol_cache.keys():
+		if str(id_s) == component_id:
+			return str(id_s)
+	return ""
 
 
 func _draw_nets() -> void:

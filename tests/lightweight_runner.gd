@@ -11,6 +11,7 @@ const TESTS: Array = [
 	"res://tests/unit/yaml_test.gd",
 	"res://tests/unit/result_test.gd",
 	"res://tests/unit/component_symbol_test.gd",
+	"res://tests/unit/svg_export_test.gd",
 	"res://tests/unit/schematic_test.gd",
 	"res://tests/unit/schematic_annotate_test.gd",
 	"res://tests/unit/library_index_test.gd",
