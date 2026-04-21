@@ -1,0 +1,27 @@
+tools/run_tests.sh
+  60dc292f8685bcc2 15,17
+docs/architecture/ADR-0003-m1-lightweight-test-runner.md
+  60dc292f8685bcc2 40
+project.godot
+  60dc292f8685bcc2 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "0de202dc86b788e915b4db9ec9f695ce19d5fd4e",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 58,
+      "total_deletions": 6,
+      "accepted_lines": 58,
+      "overriden_lines": 0
+    }
+  }
+}
