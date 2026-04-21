@@ -139,38 +139,69 @@ static func _connect(params: Dictionary) -> Result:
 
 
 static func _annotate(params: Dictionary) -> Result:
-	## 自动重新编号未命名元件。M1 简化版：按放置顺序为 "?" 结尾的 reference 赋号。
+	## 自动重新编号未命名元件（reference 形如 "R?"）。按前缀独立分桶分配。
+	## 参数：
+	##   path: schematic 文件路径
+	##   start_at: Dictionary，按前缀指定起始候选号，例如 {"R": 100, "U": 200}；
+	##             从该号起按递增顺序跳过已被占用的号，落到第一个空位。
+	##             默认 1。当无 start_at 时，"填 gap" 语义生效（如 R1/R3 已占，
+	##             两个 R? 分别得 R2/R4）。
 	var path: String = str(params.get("path", ""))
 	if path == "":
 		return Result.err(1, "missing 'path'")
 	var s := _load(path)
 	if s == null:
 		return Result.err(1, "schematic not found")
-	var counters: Dictionary = {}
-	## 先扫已命名的，用其最大编号初始化 counter
+	var start_at: Dictionary = params.get("start_at", {}) if params.get("start_at") is Dictionary else {}
+
+	## 收集每个前缀已被占用的号段 → used[prefix] = {num: true}
+	var used: Dictionary = {}
 	for pl in s.placements:
 		var ref: String = str(pl.get("reference", ""))
 		if ref.ends_with("?") or ref == "":
 			continue
 		var prefix := ""
-		var num := 0
+		var num := -1
 		for i in ref.length():
 			if ref[i].is_valid_int():
 				prefix = ref.substr(0, i)
 				num = int(ref.substr(i))
 				break
-		if prefix != "":
-			counters[prefix] = max(counters.get(prefix, 0), num)
+		if prefix == "" or num < 0:
+			continue
+		if not used.has(prefix):
+			used[prefix] = {}
+		(used[prefix] as Dictionary)[num] = true
+
+	## 每个前缀的候选起号；默认从 1（或 start_at[prefix]）开始，遇到占用号逐个跳。
+	## 不跳到已用最大号之后——保持"填 gap"语义，避免空号段浪费。
+	var next_num: Dictionary = {}
+	for prefix in used.keys():
+		next_num[prefix] = max(int(start_at.get(prefix, 1)), 1)
+	for prefix in start_at.keys():
+		if not next_num.has(prefix):
+			next_num[prefix] = max(int(start_at[prefix]), 1)
+		if not used.has(prefix):
+			used[prefix] = {}
 
 	var renamed := 0
 	for pl in s.placements:
 		var ref: String = str(pl.get("reference", ""))
-		if ref.ends_with("?"):
-			var prefix := ref.substr(0, ref.length() - 1)
-			var next_n: int = int(counters.get(prefix, 0)) + 1
-			counters[prefix] = next_n
-			pl["reference"] = "%s%d" % [prefix, next_n]
-			renamed += 1
+		if not ref.ends_with("?"):
+			continue
+		var prefix := ref.substr(0, ref.length() - 1)
+		if not used.has(prefix):
+			used[prefix] = {}
+		if not next_num.has(prefix):
+			next_num[prefix] = int(start_at.get(prefix, 1))
+		var n: int = int(next_num[prefix])
+		while (used[prefix] as Dictionary).has(n):
+			n += 1
+		(used[prefix] as Dictionary)[n] = true
+		next_num[prefix] = n + 1
+		pl["reference"] = "%s%d" % [prefix, n]
+		renamed += 1
+
 	if _save(path, s) != OK:
 		return Result.err(2, "write failed")
 	var r := Result.success({"path": path, "renamed": renamed})

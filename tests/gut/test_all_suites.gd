@@ -47,6 +47,10 @@ func test_schematic() -> void:
 	_run_suite("res://tests/unit/schematic_test.gd")
 
 
+func test_schematic_annotate() -> void:
+	_run_suite("res://tests/unit/schematic_annotate_test.gd")
+
+
 func test_library_index() -> void:
 	_run_suite("res://tests/unit/library_index_test.gd")
 
