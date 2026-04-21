@@ -44,14 +44,17 @@ addons/gut/   # GUT 测试框架
 ## 运行与测试命令
 
 ```bash
-# 轻量 runner（推荐，最快回归）：
+# 双轨入口（首选）：装 GUT 走 GUT；否则回退 lightweight_runner。
+tools/run_tests.sh
+
+# 轻量 runner（最快回归，无 GUT 依赖）：
 godot --headless -s tests/lightweight_runner.gd
 
-# GUT 全量：
-godot --headless --path . -s addons/gut/gut_cmdln.gd
+# GUT 全量（需先 godot --headless --import 让 class_name 注册）：
+godot --headless --path . -s res://addons/gut/gut_cmdln.gd -gdir=res://tests/gut/ -gexit
 
 # 单个测试脚本（临时加到 lightweight_runner.gd TESTS 列表，或用 GUT 的 -gselect）：
-godot --headless -s addons/gut/gut_cmdln.gd -gselect=tests/unit/<name>_test.gd
+godot --headless --path . -s res://addons/gut/gut_cmdln.gd -gselect=tests/unit/<name>_test.gd -gexit
 
 # CLI 调用（argv 模式）：
 godot --headless -s cli/main.gd -- '{"jsonrpc":"2.0","id":1,"method":"project.new","params":{"path":"demo/led_blink.pcbproj"}}'
@@ -63,6 +66,21 @@ echo '{"jsonrpc":"2.0","id":1,"method":"schematic.list_components","params":{}}'
 ```
 
 CLI 退出码走 `Runtime/core/error.gd::code_to_exit`；成功 0，用户错非 0。方法列表：`cli/main.gd::_register_all` 聚合 `ProjectCommands / SymbolCommands / LibraryCommands / SchematicCommands / CheckCommands / SkillsCommands / RunCommands`。
+
+## 格式化
+
+```bash
+# 提交前检查（不写入）：
+tools/fmt_check.sh
+
+# 一键格式化（写入）：
+tools/fmt.sh
+```
+
+依赖 `gdtoolkit` 4.x（`pip install "gdtoolkit==4.*"`）。M1.1 已落工具链，但**全仓 fmt baseline 未跑**——
+gdformat 4.5 重排部分多行 `func():` lambda 后会撞 Godot 4.6 解析 bug，需先把测试代码里的多行 lambda 抽为
+helper / 单行化（follow-up）。新写代码请尽量手动遵循 gdformat 默认风格，避免在表达式中写多行 lambda。
+M2 起 CI 挂 `tools/fmt_check.sh` 门禁。
 
 ## 架构铁律
 
