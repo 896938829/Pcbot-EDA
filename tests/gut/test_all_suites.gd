@@ -69,3 +69,7 @@ func test_command_registry() -> void:
 
 func test_led_blink_e2e() -> void:
 	_run_suite("res://tests/integration/led_blink_e2e_test.gd")
+
+
+func test_cli_stdin() -> void:
+	_run_suite("res://tests/integration/cli_stdin_test.gd")

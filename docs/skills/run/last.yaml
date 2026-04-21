@@ -14,3 +14,23 @@ example:
 common_errors:
   - code: USER_ERROR
     when: "project_root 缺失或 .pcbot/last-run.json 不存在"
+
+invocation_modes:
+  description: |
+    cli/main.gd 接收 JSON-RPC 请求的三种途径，按优先级排列：
+    1. argv 内联（`--` 之后的第一个 user arg 即请求 JSON 字符串）；
+    2. `--input <file>`（user arg 中的旗标 + 文件路径）；
+    3. stdin 单行（无 argv 时回退）。
+  examples:
+    - mode: argv inline
+      shell: |
+        godot --headless -s cli/main.gd -- '{"jsonrpc":"2.0","id":1,"method":"run.last","params":{"project_root":"demo"}}'
+    - mode: --input file
+      shell: |
+        echo '{"jsonrpc":"2.0","id":1,"method":"run.last","params":{"project_root":"demo"}}' > /tmp/req.json
+        godot --headless -s cli/main.gd -- --input /tmp/req.json
+    - mode: stdin pipe
+      shell: |
+        echo '{"jsonrpc":"2.0","id":1,"method":"run.last","params":{"project_root":"demo"}}' | godot --headless -s cli/main.gd
+      caveat: |
+        Windows headless 下 stdin 阻塞行为不稳；自动化场景优先用 argv 或 --input。

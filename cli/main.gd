@@ -59,9 +59,18 @@ func _register_all(registry: CommandRegistry) -> void:
 
 
 func _read_request_text() -> String:
+	## 优先级：argv inline JSON（args[0] 非 "--input"）> --input <file> > stdin。
+	## --input 用于在子进程测试中绕开 stdin 在 Windows headless 下的不可靠性。
 	var args := OS.get_cmdline_user_args()
-	if args.size() > 0:
-		return args[0]
+	if args.size() > 0 and str(args[0]) != "--input":
+		return str(args[0])
+	for i in args.size():
+		if str(args[i]) == "--input" and i + 1 < args.size():
+			var fpath: String = str(args[i + 1])
+			var f := FileAccess.open(fpath, FileAccess.READ)
+			if f == null:
+				return ""
+			return f.get_as_text()
 	var line := OS.read_string_from_stdin()
 	return line
 
