@@ -1,0 +1,31 @@
+docs/skills/schematic/annotate.yaml
+  60dc292f8685bcc2 2-3,6,9-28,30-31
+Runtime/modules/schematic/commands.gd
+  60dc292f8685bcc2 142-148,155-158,164,170-174,176-185,190-204
+tests/unit/schematic_annotate_test.gd
+  60dc292f8685bcc2 1-74
+tests/lightweight_runner.gd
+  60dc292f8685bcc2 15
+tests/gut/test_all_suites.gd
+  60dc292f8685bcc2 50-53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "3694e27ae1a736bfeb00bff0c3fa63e02b88c526",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 157,
+      "total_deletions": 30,
+      "accepted_lines": 147,
+      "overriden_lines": 0
+    }
+  }
+}
