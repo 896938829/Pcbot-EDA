@@ -1,0 +1,40 @@
+Runtime/ui/schematic_view.gd
+  e19f493cc94e3188 10-11,17,24,27,42-48,50-88
+Runtime/ui/library_panel.gd
+  e19f493cc94e3188 1,4-8,10,12-21,25-175
+Runtime/ui/main_window.gd
+  e19f493cc94e3188 10,116-117,119,128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "f2cc46906bef918d74a8d7bb9c5458bfce7a2794",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 291,
+      "total_deletions": 11,
+      "accepted_lines": 229,
+      "overriden_lines": 0
+    }
+  }
+}
