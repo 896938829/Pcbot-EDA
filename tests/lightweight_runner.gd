@@ -22,6 +22,7 @@ const TESTS: Array = [
 	"res://tests/unit/diagnostics_log_test.gd",
 	"res://tests/unit/command_registry_test.gd",
 	"res://tests/integration/led_blink_e2e_test.gd",
+	"res://tests/integration/gui_edit_roundtrip_test.gd",
 	"res://tests/integration/cli_stdin_test.gd",
 ]
 

@@ -1,0 +1,20 @@
+name: schematic.disconnect_pin
+description: 从所有 net 中移除指定 pin_ref；若 net 剩余 pins<2 则 net 自动删除。
+triggers:
+  - 把某个引脚从网络上拆开
+params:
+  path: 原理图路径（必填）
+  pin: "<reference>.<pin_number>，例 R1.2（必填）"
+returns:
+  affected_nets: "被触碰的 net id 列表（含被 pins<2 整体删除的）"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.disconnect_pin
+    params:
+      path: "demo/led_blink.sch.json"
+      pin: "R1.2"
+common_errors:
+  - code: USER_ERROR
+    when: "pin 格式不对（必须 <reference>.<pin_number>）"
