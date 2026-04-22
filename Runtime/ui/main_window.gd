@@ -7,6 +7,7 @@ extends Control
 ## 设计编辑走 CLI 命令（ADR-0005）；本文件只做入口装配与菜单触发。
 
 @onready var _view: Control = $VBox/MainSplit/MidRightSplit/CenterSplit/SchematicView
+@onready var _library_panel: LibraryPanel = $VBox/MainSplit/LeftDock
 @onready var _status_bar: HBoxContainer = $VBox/StatusBar
 @onready var _menu_file: PopupMenu = $VBox/MenuBar/文件
 
@@ -112,8 +113,10 @@ func _load_project(path: String) -> void:
 		return
 	var project := DesignProject.from_dict(data)
 
+	var lib_root: String = path.get_base_dir().path_join("library")
+	_library_panel.set_library_root(lib_root)
 	if project.schematic_refs.size() == 0:
-		_view.set_schematic(null, "")
+		_view.set_schematic(null, "", "")
 		_set_status("工程 %s · 原理图 0 · 库引用 %d" % [project.name, project.library_refs.size()])
 		return
 	var sch_path: String = path.get_base_dir().path_join(project.schematic_refs[0])
@@ -122,8 +125,7 @@ func _load_project(path: String) -> void:
 		_set_status("原理图不可读: %s" % sch_path)
 		return
 	var sch := Schematic.from_dict(sch_data)
-	var lib_root: String = path.get_base_dir().path_join("library")
-	_view.set_schematic(sch, lib_root)
+	_view.set_schematic(sch, lib_root, sch_path)
 	_set_status(
 		(
 			"工程 %s · 元件 %d · 网络 %d · 库引用 %d"

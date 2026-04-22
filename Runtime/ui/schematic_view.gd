@@ -7,20 +7,24 @@ extends Control
 const WORLD_PER_NM: float = 1.0 / 10000.0  ## 10000 nm = 1 world unit
 const TEXTURE_ZOOM_THRESHOLD: float = 0.4  ## 缩放低于此阈值时回退矩形，避免百元件全纹理绘制卡顿
 
+signal schematic_changed  ## disk 落盘后发出，供属性面板 / 状态栏刷新
+
 var _schematic: Schematic
 var _symbol_cache: Dictionary = {}      ## id → sym dict
 var _texture_cache: Dictionary = {}     ## id → ImageTexture（无纹理则不入）
 var _bbox_cache: Dictionary = {}        ## id → Rect2 in mm（用于纹理缩放定位）
 var _lib_root: String = ""
+var _sch_path: String = ""               ## 当前原理图文件路径（drop/编辑落盘用）
 var _zoom: float = 1.0
 var _pan: Vector2 = Vector2.ZERO
 var _drag_active: bool = false
 var _drag_last: Vector2
 
 
-func set_schematic(s: Schematic, lib_root: String) -> void:
+func set_schematic(s: Schematic, lib_root: String, sch_path: String = "") -> void:
 	_schematic = s
 	_lib_root = lib_root
+	_sch_path = sch_path
 	_symbol_cache.clear()
 	_texture_cache.clear()
 	_bbox_cache.clear()
@@ -33,6 +37,55 @@ func set_schematic(s: Schematic, lib_root: String) -> void:
 			_symbol_cache[id_s] = d
 			_load_symbol_texture(id_s, d)
 	queue_redraw()
+
+
+func reload_from_disk() -> void:
+	if _sch_path == "":
+		return
+	var data = JsonStable.read_file(_sch_path)
+	if data == null:
+		return
+	_schematic = Schematic.from_dict(data)
+	queue_redraw()
+	schematic_changed.emit()
+
+
+## 像素 → nm（_nm_to_px 的逆变换）。
+func _px_to_nm(px: Vector2) -> Vector2i:
+	var world := (px - size * 0.5 - _pan) / (WORLD_PER_NM * _zoom)
+	return Vector2i(int(world.x), int(world.y))
+
+
+func _can_drop_data(_at: Vector2, data: Variant) -> bool:
+	if _sch_path == "":
+		return false
+	if typeof(data) != TYPE_DICTIONARY:
+		return false
+	return str((data as Dictionary).get("type", "")) == "lib_component"
+
+
+func _drop_data(at: Vector2, data: Variant) -> void:
+	var d := data as Dictionary
+	var comp_id: String = str(d.get("id", ""))
+	var prefix: String = str(d.get("prefix", "U"))
+	if comp_id == "" or _sch_path == "":
+		return
+	var nm := _px_to_nm(at)
+	var reg := CommandRegistry.new()
+	SchematicCommands.register(reg)
+	## 先消化既有未注解 ?，避免和新 ? 冲突
+	reg.call_method("schematic.annotate", {"path": _sch_path})
+	var r: Result = reg.call_method("schematic.place_component", {
+		"path": _sch_path,
+		"component_ref": comp_id,
+		"reference": "%s?" % prefix,
+		"pos_nm": [nm.x, nm.y],
+	})
+	if not r.ok:
+		push_error("place_component 失败: %s" % r.message)
+		return
+	reg.call_method("schematic.annotate", {"path": _sch_path})
+	reload_from_disk()
 
 
 func _load_symbol_texture(id_s: String, sym_dict: Dictionary) -> void:
