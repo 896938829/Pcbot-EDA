@@ -8,8 +8,11 @@ extends Control
 
 @onready var _view: Control = $VBox/MainSplit/MidRightSplit/CenterSplit/SchematicView
 @onready var _library_panel: LibraryPanel = $VBox/MainSplit/LeftDock
+@onready var _properties_panel: PropertiesPanel = $VBox/MainSplit/MidRightSplit/RightDock
 @onready var _status_bar: HBoxContainer = $VBox/StatusBar
 @onready var _menu_file: PopupMenu = $VBox/MenuBar/文件
+
+var _current_sch_path: String = ""
 
 enum FileMenuId { NEW = 1, OPEN = 2, DEMO = 3, QUIT = 9 }
 
@@ -21,6 +24,10 @@ func _ready() -> void:
 	_menu_file.add_separator()
 	_menu_file.add_item("退出", FileMenuId.QUIT)
 	_menu_file.id_pressed.connect(_on_file_menu)
+
+	_view.selection_changed.connect(_properties_panel.on_selection_changed)
+	_view.schematic_changed.connect(_on_schematic_changed)
+	_properties_panel.set_sch_path_getter(Callable(self, "_get_current_sch_path"))
 
 	var args := OS.get_cmdline_args()
 	for i in args.size():
@@ -116,6 +123,7 @@ func _load_project(path: String) -> void:
 	var lib_root: String = path.get_base_dir().path_join("library")
 	_library_panel.set_library_root(lib_root)
 	if project.schematic_refs.size() == 0:
+		_current_sch_path = ""
 		_view.set_schematic(null, "", "")
 		_set_status("工程 %s · 原理图 0 · 库引用 %d" % [project.name, project.library_refs.size()])
 		return
@@ -125,6 +133,7 @@ func _load_project(path: String) -> void:
 		_set_status("原理图不可读: %s" % sch_path)
 		return
 	var sch := Schematic.from_dict(sch_data)
+	_current_sch_path = sch_path
 	_view.set_schematic(sch, lib_root, sch_path)
 	_set_status(
 		(
@@ -137,3 +146,16 @@ func _load_project(path: String) -> void:
 func _set_status(text: String) -> void:
 	if _status_bar != null and _status_bar.has_method("set_status"):
 		_status_bar.set_status(text)
+
+
+func _get_current_sch_path() -> String:
+	return _current_sch_path
+
+
+func _on_schematic_changed() -> void:
+	## disk 落盘后：若当前选中 placement 仍存在，刷新属性面板字段
+	var sel: Dictionary = _view.get_selected_placement()
+	if sel.is_empty():
+		_properties_panel.on_selection_changed("", "", {})
+	else:
+		_properties_panel.on_selection_changed("placement", str(sel.get("uid", "")), sel)

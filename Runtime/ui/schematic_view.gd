@@ -8,6 +8,7 @@ const WORLD_PER_NM: float = 1.0 / 10000.0  ## 10000 nm = 1 world unit
 const TEXTURE_ZOOM_THRESHOLD: float = 0.4  ## 缩放低于此阈值时回退矩形，避免百元件全纹理绘制卡顿
 
 signal schematic_changed  ## disk 落盘后发出，供属性面板 / 状态栏刷新
+signal selection_changed(kind: String, uid: String, data: Dictionary)  ## kind: "placement" or ""
 
 var _schematic: Schematic
 var _symbol_cache: Dictionary = {}      ## id → sym dict
@@ -19,6 +20,7 @@ var _zoom: float = 1.0
 var _pan: Vector2 = Vector2.ZERO
 var _drag_active: bool = false
 var _drag_last: Vector2
+var _selected_uid: String = ""  ## 当前选中的 placement uid，""=无选中
 
 
 func set_schematic(s: Schematic, lib_root: String, sch_path: String = "") -> void:
@@ -113,11 +115,52 @@ func _gui_input(event: InputEvent) -> void:
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_drag_active = mb.pressed
 			_drag_last = mb.position
+		elif mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
+			var hit := _find_placement_at(mb.position)
+			if hit.is_empty():
+				_set_selection("", "", {})
+			else:
+				_set_selection("placement", str(hit.get("uid", "")), hit)
 	elif event is InputEventMouseMotion and _drag_active:
 		var mm := event as InputEventMouseMotion
 		_pan += mm.position - _drag_last
 		_drag_last = mm.position
 		queue_redraw()
+
+
+func _find_placement_at(px: Vector2) -> Dictionary:
+	if _schematic == null:
+		return {}
+	var mm_to_px: float = 1_000_000.0 * WORLD_PER_NM * _zoom
+	for pl in _schematic.placements:
+		var pos: Array = pl.get("pos_nm", [0, 0])
+		var center := _nm_to_px(Vector2i(int(pos[0]), int(pos[1])))
+		var sym_id := _symbol_id_for_component(str(pl.get("component_ref", "")))
+		var bbox_mm: Rect2 = _bbox_cache.get(sym_id, Rect2()) if sym_id != "" else Rect2()
+		var w: float = max(bbox_mm.size.x * mm_to_px, 20.0)
+		var h: float = max(bbox_mm.size.y * mm_to_px, 20.0)
+		var r := Rect2(center - Vector2(w * 0.5, h * 0.5), Vector2(w, h))
+		if r.has_point(px):
+			return pl
+	return {}
+
+
+func _set_selection(kind: String, uid: String, data: Dictionary) -> void:
+	var prev := _selected_uid
+	_selected_uid = uid
+	if prev != _selected_uid:
+		queue_redraw()
+	selection_changed.emit(kind, uid, data)
+
+
+func get_selected_placement() -> Dictionary:
+	if _schematic == null or _selected_uid == "":
+		return {}
+	return _schematic.find_placement(_selected_uid)
+
+
+func get_sch_path() -> String:
+	return _sch_path
 
 
 func _draw() -> void:
@@ -163,17 +206,21 @@ func _draw_placements() -> void:
 		var sym_id := _symbol_id_for_component(comp_id)
 		var tex: ImageTexture = _texture_cache.get(sym_id, null) if sym_id != "" else null
 		var bbox_mm: Rect2 = _bbox_cache.get(sym_id, Rect2()) if sym_id != "" else Rect2()
+		var is_selected := _selected_uid != "" and str(pl.get("uid", "")) == _selected_uid
+		var draw_rect_r: Rect2
 		if tex != null and _zoom >= TEXTURE_ZOOM_THRESHOLD and bbox_mm.size.x > 0:
 			var w: float = bbox_mm.size.x * mm_to_px
 			var h: float = bbox_mm.size.y * mm_to_px
-			var dst := Rect2(center - Vector2(w * 0.5, h * 0.5), Vector2(w, h))
-			draw_texture_rect(tex, dst, false)
-			draw_string(font, dst.position + Vector2(0, -4), ref, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+			draw_rect_r = Rect2(center - Vector2(w * 0.5, h * 0.5), Vector2(w, h))
+			draw_texture_rect(tex, draw_rect_r, false)
+			draw_string(font, draw_rect_r.position + Vector2(0, -4), ref, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
 		else:
 			var half: float = 40.0 * _zoom
-			var rect := Rect2(center - Vector2(half, half), Vector2(half * 2, half * 2))
-			draw_rect(rect, Color(0.15, 0.45, 0.75), false, 2.0)
+			draw_rect_r = Rect2(center - Vector2(half, half), Vector2(half * 2, half * 2))
+			draw_rect(draw_rect_r, Color(0.15, 0.45, 0.75), false, 2.0)
 			draw_string(font, center + Vector2(-half, -half - 4), ref, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.WHITE)
+		if is_selected:
+			draw_rect(draw_rect_r.grow(4.0), Color(1.0, 0.55, 0.1), false, 2.0)
 
 
 func _symbol_id_for_component(component_id: String) -> String:

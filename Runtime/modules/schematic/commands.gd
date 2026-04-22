@@ -4,12 +4,17 @@ extends RefCounted
 ## schematic.new / add_page / place_component / connect / annotate
 
 
+const SET_PROPERTY_WHITELIST: Array = ["reference", "mirror"]
+
+
 static func register(registry: CommandRegistry) -> void:
 	registry.add("schematic.new", func(p): return _new(p))
 	registry.add("schematic.add_page", func(p): return _add_page(p))
 	registry.add("schematic.place_component", func(p): return _place_component(p))
 	registry.add("schematic.connect", func(p): return _connect(p))
 	registry.add("schematic.annotate", func(p): return _annotate(p))
+	registry.add("schematic.set_property", func(p): return _set_property(p))
+	registry.add("schematic.rotate_placement", func(p): return _rotate_placement(p))
 
 
 static func _load(path: String) -> Schematic:
@@ -134,6 +139,69 @@ static func _connect(params: Dictionary) -> Result:
 	if _save(path, s) != OK:
 		return Result.err(2, "write failed")
 	var r := Result.success({"path": path, "net": net_name, "pin_count": pins.size()})
+	r.add_touched(path)
+	return r
+
+
+static func _set_property(params: Dictionary) -> Result:
+	## 修改单个 placement 的可白名单字段。
+	## key ∈ SET_PROPERTY_WHITELIST（reference / mirror）。
+	## rotation_deg 走 schematic.rotate_placement（独立原子），pos_nm 走 move_placement。
+	var path: String = str(params.get("path", ""))
+	var uid: String = str(params.get("placement_uid", ""))
+	var key: String = str(params.get("key", ""))
+	if path == "" or uid == "" or key == "":
+		return Result.err(1, "missing 'path', 'placement_uid' or 'key'")
+	if not SET_PROPERTY_WHITELIST.has(key):
+		return Result.err(1, "key not in whitelist: %s (allowed: %s)" % [key, SET_PROPERTY_WHITELIST])
+	var value = params.get("value", null)
+	if value == null:
+		return Result.err(1, "missing 'value'")
+	var s := _load(path)
+	if s == null:
+		return Result.err(1, "schematic not found")
+	var pl: Dictionary = s.find_placement(uid)
+	if pl.is_empty():
+		return Result.err(1, "placement not found: %s" % uid)
+	if key == "reference":
+		var new_ref: String = str(value)
+		if new_ref == "":
+			return Result.err(1, "reference cannot be empty")
+		var other: Dictionary = s.find_placement_by_ref(new_ref)
+		if not other.is_empty() and str(other.get("uid", "")) != uid:
+			return Result.err(1, "reference already used: %s" % new_ref)
+		pl["reference"] = new_ref
+	elif key == "mirror":
+		pl["mirror"] = bool(value)
+	if _save(path, s) != OK:
+		return Result.err(2, "write failed")
+	var r := Result.success({"path": path, "uid": uid, "key": key, "value": pl[key]})
+	r.add_touched(path)
+	return r
+
+
+static func _rotate_placement(params: Dictionary) -> Result:
+	var path: String = str(params.get("path", ""))
+	var uid: String = str(params.get("placement_uid", ""))
+	if path == "" or uid == "":
+		return Result.err(1, "missing 'path' or 'placement_uid'")
+	if not params.has("rotation_deg"):
+		return Result.err(1, "missing 'rotation_deg'")
+	var rot := int(params["rotation_deg"]) % 360
+	if rot < 0:
+		rot += 360
+	if rot % 90 != 0:
+		return Result.err(1, "rotation_deg must be multiple of 90, got %d" % rot)
+	var s := _load(path)
+	if s == null:
+		return Result.err(1, "schematic not found")
+	var pl: Dictionary = s.find_placement(uid)
+	if pl.is_empty():
+		return Result.err(1, "placement not found: %s" % uid)
+	pl["rotation_deg"] = rot
+	if _save(path, s) != OK:
+		return Result.err(2, "write failed")
+	var r := Result.success({"path": path, "uid": uid, "rotation_deg": rot})
 	r.add_touched(path)
 	return r
 
