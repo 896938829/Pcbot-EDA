@@ -86,7 +86,7 @@ M2 起 CI 挂 `tools/fmt_check.sh` 门禁。
 
 这些是设计不变量，违反视作 bug：
 
-- **AI 设计、人类审核**：任何设计操作必须有 CLI 对应方法；纯 GUI-only 功能禁止。编辑器**不得**嵌入 AI 推理。
+- **AI 与人类共用 CLI**：任何设计操作必须有 `Runtime/modules/<domain>/commands.gd` 注册的 CLI 方法；GUI 编辑动作经 CLI 命令落盘（不直接改 JSON、不绕过 `Result`）；GUI 与 CLI 地位对等。编辑器**不得**嵌入 AI 推理（无 LLM 调用、无本地模型）。详见 [ADR-0005](docs/architecture/ADR-0005-gui-as-first-class-edit-surface.md)。
 - **模块边界**：`Runtime/modules/<domain>/` 只能依赖 `Runtime/core/` 与本模块内脚本。跨模块通信走 `EventBus` 或显式注入。**禁止**跨模块 `preload` 他人内部脚本。
 - **I/O 分层**：`Runtime/io/` 不得引用领域模型；上层负责映射。
 - **坐标单位**：内部一律 `int64` 纳米（nm）。常量 `NM_PER_MM=1_000_000`、`NM_PER_MIL=25_400`，换算集中在 `Runtime/core/unit_system.gd`。跨模块 API 不得暴露 `float` 坐标，UI/导出层才做浮点转换。
