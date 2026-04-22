@@ -21,8 +21,13 @@ var _mirror_check: CheckBox
 var _status: Label
 
 var _sch_path_getter: Callable
+var _undo_stack: UndoStack
 
 const ROTATIONS: Array = [0, 90, 180, 270]
+
+
+func set_undo_stack(u: UndoStack) -> void:
+	_undo_stack = u
 
 
 func _ready() -> void:
@@ -123,6 +128,12 @@ func _call(method: String, params: Dictionary) -> Result:
 	return reg.call_method(method, params)
 
 
+func _push_undo(forward: Dictionary, inverse: Dictionary) -> void:
+	if _undo_stack == null:
+		return
+	_undo_stack.push({"forward": [forward], "inverse": [inverse]})
+
+
 func _on_reference_submitted(text: String) -> void:
 	if _kind != "placement" or _uid == "":
 		return
@@ -130,11 +141,16 @@ func _on_reference_submitted(text: String) -> void:
 	if path == "":
 		_status.text = "无 sch_path，拒绝提交"
 		return
-	var r: Result = _call(
-		"schematic.set_property",
-		{"path": path, "placement_uid": _uid, "key": "reference", "value": text}
-	)
+	var prev: String = str(_data.get("reference", ""))
+	var params := {"path": path, "placement_uid": _uid, "key": "reference", "value": text}
+	var r: Result = _call("schematic.set_property", params)
 	if r.ok:
+		_data["reference"] = text
+		_push_undo(
+			{"method": "schematic.set_property", "params": params},
+			{"method": "schematic.set_property",
+			 "params": {"path": path, "placement_uid": _uid, "key": "reference", "value": prev}}
+		)
 		_status.text = "reference = %s" % text
 	else:
 		_status.text = "失败: %s" % r.message
@@ -147,11 +163,18 @@ func _on_rot_selected(idx: int) -> void:
 	if path == "":
 		return
 	var deg: int = ROTATIONS[idx]
-	var r: Result = _call(
-		"schematic.rotate_placement",
-		{"path": path, "placement_uid": _uid, "rotation_deg": deg}
-	)
+	var prev: int = int(_data.get("rotation_deg", 0))
+	if prev == deg:
+		return
+	var params := {"path": path, "placement_uid": _uid, "rotation_deg": deg}
+	var r: Result = _call("schematic.rotate_placement", params)
 	if r.ok:
+		_data["rotation_deg"] = deg
+		_push_undo(
+			{"method": "schematic.rotate_placement", "params": params},
+			{"method": "schematic.rotate_placement",
+			 "params": {"path": path, "placement_uid": _uid, "rotation_deg": prev}}
+		)
 		_status.text = "rotation_deg = %d" % deg
 	else:
 		_status.text = "失败: %s" % r.message
@@ -163,11 +186,18 @@ func _on_mirror_toggled(pressed: bool) -> void:
 	var path := _sch_path()
 	if path == "":
 		return
-	var r: Result = _call(
-		"schematic.set_property",
-		{"path": path, "placement_uid": _uid, "key": "mirror", "value": pressed}
-	)
+	var prev: bool = bool(_data.get("mirror", false))
+	if prev == pressed:
+		return
+	var params := {"path": path, "placement_uid": _uid, "key": "mirror", "value": pressed}
+	var r: Result = _call("schematic.set_property", params)
 	if r.ok:
+		_data["mirror"] = pressed
+		_push_undo(
+			{"method": "schematic.set_property", "params": params},
+			{"method": "schematic.set_property",
+			 "params": {"path": path, "placement_uid": _uid, "key": "mirror", "value": prev}}
+		)
 		_status.text = "mirror = %s" % str(pressed)
 	else:
 		_status.text = "失败: %s" % r.message

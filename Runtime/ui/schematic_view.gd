@@ -7,6 +7,13 @@ extends Control
 const WORLD_PER_NM: float = 1.0 / 10000.0  ## 10000 nm = 1 world unit
 const TEXTURE_ZOOM_THRESHOLD: float = 0.4  ## 缩放低于此阈值时回退矩形，避免百元件全纹理绘制卡顿
 
+var _undo_stack: UndoStack
+
+
+func set_undo_stack(u: UndoStack) -> void:
+	_undo_stack = u
+
+
 signal schematic_changed  ## disk 落盘后发出，供属性面板 / 状态栏刷新
 signal selection_changed(kind: String, uid: String, data: Dictionary)  ## kind: "placement" or ""
 signal hover_changed(uid: String)
@@ -165,16 +172,24 @@ func _drop_data(at: Vector2, data: Variant) -> void:
 	SchematicCommands.register(reg)
 	## 先消化既有未注解 ?，避免和新 ? 冲突
 	reg.call_method("schematic.annotate", {"path": _sch_path})
-	var r: Result = reg.call_method("schematic.place_component", {
+	var place_params: Dictionary = {
 		"path": _sch_path,
 		"component_ref": comp_id,
 		"reference": "%s?" % prefix,
 		"pos_nm": [nm.x, nm.y],
-	})
+	}
+	var r: Result = reg.call_method("schematic.place_component", place_params)
 	if not r.ok:
 		push_error("place_component 失败: %s" % r.message)
 		return
+	var new_uid := str(r.data.get("uid", ""))
 	reg.call_method("schematic.annotate", {"path": _sch_path})
+	if _undo_stack != null and new_uid != "":
+		_undo_stack.push({
+			"forward": [{"method": "schematic.place_component", "params": place_params}],
+			"inverse": [{"method": "schematic.remove_placement",
+						 "params": {"path": _sch_path, "placement_uid": new_uid}}],
+		})
 	reload_from_disk()
 
 
@@ -318,11 +333,19 @@ func _apply_move() -> void:
 	var new_y: int = int(_move_start_pos_nm[1]) + int(offset_nm.y)
 	var reg := CommandRegistry.new()
 	SchematicCommands.register(reg)
-	var r: Result = reg.call_method(
-		"schematic.move_placement",
-		{"path": _sch_path, "placement_uid": _move_uid, "pos_nm": [new_x, new_y]}
-	)
+	var forward := {
+		"method": "schematic.move_placement",
+		"params": {"path": _sch_path, "placement_uid": _move_uid, "pos_nm": [new_x, new_y]},
+	}
+	var inverse := {
+		"method": "schematic.move_placement",
+		"params": {"path": _sch_path, "placement_uid": _move_uid,
+				   "pos_nm": [int(_move_start_pos_nm[0]), int(_move_start_pos_nm[1])]},
+	}
+	var r: Result = reg.call_method(forward.method, forward.params)
 	if r.ok:
+		if _undo_stack != null:
+			_undo_stack.push({"forward": [forward], "inverse": [inverse]})
 		reload_from_disk()
 	else:
 		push_error("move_placement 失败: %s" % r.message)

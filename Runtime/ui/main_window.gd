@@ -12,8 +12,12 @@ extends Control
 @onready var _log_panel: LogPanel = $VBox/MainSplit/MidRightSplit/CenterSplit/BottomTabs/日志
 @onready var _status_bar: StatusBar = $VBox/StatusBar
 @onready var _menu_file: PopupMenu = $VBox/MenuBar/文件
+@onready var _menu_edit: PopupMenu = $VBox/MenuBar/编辑
 
 var _current_sch_path: String = ""
+var _undo: UndoStack = UndoStack.new()
+
+enum EditMenuId { UNDO = 1, REDO = 2, DELETE = 3 }
 
 enum FileMenuId { NEW = 1, OPEN = 2, DEMO = 3, QUIT = 9 }
 
@@ -25,6 +29,15 @@ func _ready() -> void:
 	_menu_file.add_separator()
 	_menu_file.add_item("退出", FileMenuId.QUIT)
 	_menu_file.id_pressed.connect(_on_file_menu)
+
+	_menu_edit.add_item("撤销 (Ctrl+Z)", EditMenuId.UNDO)
+	_menu_edit.add_item("重做 (Ctrl+Y)", EditMenuId.REDO)
+	_menu_edit.add_separator()
+	_menu_edit.add_item("删除选中 (Del)", EditMenuId.DELETE)
+	_menu_edit.id_pressed.connect(_on_edit_menu)
+
+	_view.set_undo_stack(_undo)
+	_properties_panel.set_undo_stack(_undo)
 
 	_view.selection_changed.connect(_properties_panel.on_selection_changed)
 	_view.schematic_changed.connect(_on_schematic_changed)
@@ -40,6 +53,34 @@ func _ready() -> void:
 			_load_project(a)
 			return
 	_set_status("就绪 · 文件 菜单 新建 / 打开 / 载入 Demo")
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed:
+		return
+	var k := event as InputEventKey
+	if k.ctrl_pressed and k.keycode == KEY_Z:
+		if _undo.undo():
+			_view.reload_from_disk()
+			_set_status("撤销 · 栈 %d" % _undo.size())
+		accept_event()
+	elif k.ctrl_pressed and k.keycode == KEY_Y:
+		if _undo.redo():
+			_view.reload_from_disk()
+			_set_status("重做 · 栈 %d" % _undo.size())
+		accept_event()
+
+
+func _on_edit_menu(id: int) -> void:
+	match id:
+		EditMenuId.UNDO:
+			if _undo.undo():
+				_view.reload_from_disk()
+		EditMenuId.REDO:
+			if _undo.redo():
+				_view.reload_from_disk()
+		EditMenuId.DELETE:
+			_view._delete_selected()
 
 
 func _on_file_menu(id: int) -> void:
@@ -139,6 +180,7 @@ func _load_project(path: String) -> void:
 		return
 	var sch := Schematic.from_dict(sch_data)
 	_current_sch_path = sch_path
+	_undo.clear()
 	_view.set_schematic(sch, lib_root, sch_path)
 	_set_status(
 		(
