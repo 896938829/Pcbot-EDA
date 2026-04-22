@@ -1,0 +1,42 @@
+tests/unit/schematic_edit_primitives_test.gd
+  e19f493cc94e3188 1-125
+Runtime/modules/schematic/commands.gd
+  e19f493cc94e3188 18-21,213-330
+Runtime/ui/schematic_view.gd
+  e19f493cc94e3188 32-36,171-182,184-190,197-199,210-228,362-363
+tests/lightweight_runner.gd
+  e19f493cc94e3188 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "65b5deb9dd2347e61cd566fab5fee7987cccd0f9",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 297,
+      "total_deletions": 6,
+      "accepted_lines": 296,
+      "overriden_lines": 0
+    }
+  }
+}
