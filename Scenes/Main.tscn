@@ -1,7 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://bpcbotm1main"]
+[gd_scene load_steps=8 format=3 uid="uid://bpcbotm1main"]
 
 [ext_resource type="Script" path="res://Runtime/ui/main_window.gd" id="1_main"]
 [ext_resource type="Script" path="res://Runtime/ui/schematic_view.gd" id="2_view"]
+[ext_resource type="Script" path="res://Runtime/ui/library_panel.gd" id="3_lib"]
+[ext_resource type="Script" path="res://Runtime/ui/properties_panel.gd" id="4_props"]
+[ext_resource type="Script" path="res://Runtime/ui/log_panel.gd" id="5_log"]
+[ext_resource type="Script" path="res://Runtime/ui/cli_console.gd" id="6_cli"]
+[ext_resource type="Script" path="res://Runtime/ui/status_bar.gd" id="7_status"]
 
 [node name="MainWindow" type="Control"]
 anchor_right = 1.0
@@ -12,26 +17,49 @@ script = ExtResource("1_main")
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="Toolbar" type="HBoxContainer" parent="VBox"]
-custom_minimum_size = Vector2(0, 32)
+[node name="MenuBar" type="MenuBar" parent="VBox"]
+custom_minimum_size = Vector2(0, 28)
+prefer_global_menu = false
 
-[node name="NewBtn" type="Button" parent="VBox/Toolbar"]
-text = "新建工程"
+[node name="文件" type="PopupMenu" parent="VBox/MenuBar"]
 
-[node name="OpenBtn" type="Button" parent="VBox/Toolbar"]
-text = "打开工程"
+[node name="编辑" type="PopupMenu" parent="VBox/MenuBar"]
 
-[node name="DemoBtn" type="Button" parent="VBox/Toolbar"]
-text = "载入 Demo"
+[node name="视图" type="PopupMenu" parent="VBox/MenuBar"]
 
-[node name="SchematicView" type="Control" parent="VBox"]
+[node name="帮助" type="PopupMenu" parent="VBox/MenuBar"]
+
+[node name="MainSplit" type="HSplitContainer" parent="VBox"]
+size_flags_vertical = 3
+split_offset = -800
+
+[node name="LeftDock" type="VBoxContainer" parent="VBox/MainSplit"]
+custom_minimum_size = Vector2(200, 0)
+script = ExtResource("3_lib")
+
+[node name="MidRightSplit" type="HSplitContainer" parent="VBox/MainSplit"]
+split_offset = 600
+
+[node name="CenterSplit" type="VSplitContainer" parent="VBox/MainSplit/MidRightSplit"]
+split_offset = -200
+
+[node name="SchematicView" type="Control" parent="VBox/MainSplit/MidRightSplit/CenterSplit"]
 size_flags_vertical = 3
 script = ExtResource("2_view")
 
-[node name="Info" type="Label" parent="VBox"]
-custom_minimum_size = Vector2(0, 60)
-text = ""
+[node name="BottomTabs" type="TabContainer" parent="VBox/MainSplit/MidRightSplit/CenterSplit"]
+custom_minimum_size = Vector2(0, 140)
 
-[node name="Status" type="Label" parent="VBox"]
+[node name="日志" type="VBoxContainer" parent="VBox/MainSplit/MidRightSplit/CenterSplit/BottomTabs"]
+script = ExtResource("5_log")
+
+[node name="CLI" type="VBoxContainer" parent="VBox/MainSplit/MidRightSplit/CenterSplit/BottomTabs"]
+script = ExtResource("6_cli")
+
+[node name="RightDock" type="VBoxContainer" parent="VBox/MainSplit/MidRightSplit"]
+custom_minimum_size = Vector2(240, 0)
+script = ExtResource("4_props")
+
+[node name="StatusBar" type="HBoxContainer" parent="VBox"]
 custom_minimum_size = Vector2(0, 24)
-text = "Pcbot"
+script = ExtResource("7_status")

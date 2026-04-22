@@ -1,20 +1,25 @@
 extends Control
 
-## 主窗口：
-## - 新建工程：保存对话框 → project.new + schematic.new
-## - 打开工程：文件对话框 → project.open
-## - 载入 demo：直接打开 res://demo/led_blink.pcbproj
-## M1 只读：不在 UI 层做设计编辑。
+## 主窗口：4-dock 布局（M1.2 P2 骨架）。
+## - 顶部 MenuBar（文件 / 编辑 / 视图 / 帮助）
+## - 左 dock LibraryPanel / 中 SchematicView + 底 TabContainer(日志|CLI) / 右 PropertiesPanel
+## - 底 StatusBar
+## 设计编辑走 CLI 命令（ADR-0005）；本文件只做入口装配与菜单触发。
 
-@onready var _view: Control = $VBox/SchematicView
-@onready var _status: Label = $VBox/Status
-@onready var _info: Label = $VBox/Info
+@onready var _view: Control = $VBox/MainSplit/MidRightSplit/CenterSplit/SchematicView
+@onready var _status_bar: HBoxContainer = $VBox/StatusBar
+@onready var _menu_file: PopupMenu = $VBox/MenuBar/文件
+
+enum FileMenuId { NEW = 1, OPEN = 2, DEMO = 3, QUIT = 9 }
 
 
 func _ready() -> void:
-	($VBox/Toolbar/NewBtn as Button).pressed.connect(_on_new_pressed)
-	($VBox/Toolbar/OpenBtn as Button).pressed.connect(_on_open_pressed)
-	($VBox/Toolbar/DemoBtn as Button).pressed.connect(_on_demo_pressed)
+	_menu_file.add_item("新建工程", FileMenuId.NEW)
+	_menu_file.add_item("打开工程", FileMenuId.OPEN)
+	_menu_file.add_item("载入 Demo", FileMenuId.DEMO)
+	_menu_file.add_separator()
+	_menu_file.add_item("退出", FileMenuId.QUIT)
+	_menu_file.id_pressed.connect(_on_file_menu)
 
 	var args := OS.get_cmdline_args()
 	for i in args.size():
@@ -22,8 +27,19 @@ func _ready() -> void:
 		if a.ends_with(".pcbproj"):
 			_load_project(a)
 			return
-	_status.text = "工具栏：新建 / 打开 / 载入 demo"
-	_info.text = ""
+	_set_status("就绪 · 文件 菜单 新建 / 打开 / 载入 Demo")
+
+
+func _on_file_menu(id: int) -> void:
+	match id:
+		FileMenuId.NEW:
+			_on_new_pressed()
+		FileMenuId.OPEN:
+			_on_open_pressed()
+		FileMenuId.DEMO:
+			_on_demo_pressed()
+		FileMenuId.QUIT:
+			get_tree().quit()
 
 
 func _on_new_pressed() -> void:
@@ -52,7 +68,7 @@ func _on_open_pressed() -> void:
 func _on_demo_pressed() -> void:
 	var demo_path := ProjectSettings.globalize_path("res://demo/led_blink.pcbproj")
 	if not FileAccess.file_exists(demo_path):
-		_status.text = "未找到 demo: %s" % demo_path
+		_set_status("未找到 demo: %s" % demo_path)
 		return
 	_load_project(demo_path)
 
@@ -71,11 +87,11 @@ func _create_project(path: String) -> void:
 
 	var pn: Result = reg.call_method("project.new", {"path": path, "name": project_name})
 	if not pn.ok:
-		_status.text = "project.new 失败: %s" % pn.message
+		_set_status("project.new 失败: %s" % pn.message)
 		return
 	var sn: Result = reg.call_method("schematic.new", {"path": sch_path, "id": project_name})
 	if not sn.ok:
-		_status.text = "schematic.new 失败: %s" % sn.message
+		_set_status("schematic.new 失败: %s" % sn.message)
 		return
 
 	var pj_data = JsonStable.read_file(path)
@@ -84,7 +100,7 @@ func _create_project(path: String) -> void:
 	pj.library_refs = []
 	JsonStable.write_file(path, pj.to_dict())
 
-	_status.text = "新建完成: %s" % path
+	_set_status("新建完成: %s" % path)
 	_load_project(path)
 
 
@@ -92,31 +108,30 @@ func _load_project(path: String) -> void:
 	path = path.replace("\\", "/")
 	var data = JsonStable.read_file(path)
 	if data == null:
-		_status.text = "无法读取: %s" % path
-		_info.text = ""
+		_set_status("无法读取: %s" % path)
 		return
 	var project := DesignProject.from_dict(data)
-	_status.text = "工程 %s — %s" % [project.name, path]
-
-	var info_lines: Array[String] = []
-	info_lines.append("原理图: %d" % project.schematic_refs.size())
-	info_lines.append("库引用: %d" % project.library_refs.size())
 
 	if project.schematic_refs.size() == 0:
-		info_lines.append("（尚无原理图）")
 		_view.set_schematic(null, "")
-		_info.text = "\n".join(info_lines)
+		_set_status("工程 %s · 原理图 0 · 库引用 %d" % [project.name, project.library_refs.size()])
 		return
 	var sch_path: String = path.get_base_dir().path_join(project.schematic_refs[0])
 	var sch_data = JsonStable.read_file(sch_path)
 	if sch_data == null:
-		info_lines.append("原理图不可读: %s" % sch_path)
-		_info.text = "\n".join(info_lines)
+		_set_status("原理图不可读: %s" % sch_path)
 		return
 	var sch := Schematic.from_dict(sch_data)
-	info_lines.append("元件: %d" % sch.placements.size())
-	info_lines.append("网络: %d" % sch.nets.size())
-	_info.text = "\n".join(info_lines)
-
 	var lib_root: String = path.get_base_dir().path_join("library")
 	_view.set_schematic(sch, lib_root)
+	_set_status(
+		(
+			"工程 %s · 元件 %d · 网络 %d · 库引用 %d"
+			% [project.name, sch.placements.size(), sch.nets.size(), project.library_refs.size()]
+		)
+	)
+
+
+func _set_status(text: String) -> void:
+	if _status_bar != null and _status_bar.has_method("set_status"):
+		_status_bar.set_status(text)
