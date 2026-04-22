@@ -1,0 +1,42 @@
+tests/perf/sch_roundtrip_perf_test.gd
+  e19f493cc94e3188 21
+tests/perf/check_basic_perf_test.gd
+  e19f493cc94e3188 24
+tests/unit/schematic_annotate_test.gd
+  e19f493cc94e3188 15
+Runtime/ui/schematic_view.gd
+  e19f493cc94e3188 109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "2734097a1634fc93cb352402c8d5237246bce7f4",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 379,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 4,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
