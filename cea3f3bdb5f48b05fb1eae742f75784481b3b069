@@ -1,0 +1,36 @@
+Runtime/ui/cli_console.gd
+  e19f493cc94e3188 1,4-9,11-12,14-20,24-153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "cea3f3bdb5f48b05fb1eae742f75784481b3b069",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 148,
+      "total_deletions": 4,
+      "accepted_lines": 148,
+      "overriden_lines": 0
+    }
+  }
+}
