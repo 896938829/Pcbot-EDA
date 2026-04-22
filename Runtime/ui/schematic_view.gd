@@ -29,6 +29,11 @@ var _selected_uid: String = ""  ## 当前选中的 placement uid，""=无选中
 var _hovered_uid: String = ""   ## 当前鼠标悬停的 placement uid
 var _grid_visible: bool = true
 var _grid_density_idx: int = 1   ## index into GRID_DENSITIES_MM, 默认 10mm
+var _move_active: bool = false
+var _move_uid: String = ""
+var _move_start_pos_nm: Array = [0, 0]
+var _move_start_px: Vector2 = Vector2.ZERO
+var _move_offset_px: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -163,17 +168,34 @@ func _gui_input(event: InputEvent) -> void:
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_drag_active = mb.pressed
 			_drag_last = mb.position
-		elif mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
-			var hit := _find_placement_at(mb.position)
-			if hit.is_empty():
-				_set_selection("", "", {})
+		elif mb.button_index == MOUSE_BUTTON_LEFT:
+			if mb.pressed:
+				var hit := _find_placement_at(mb.position)
+				if hit.is_empty():
+					_set_selection("", "", {})
+				else:
+					_set_selection("placement", str(hit.get("uid", "")), hit)
+					_move_active = true
+					_move_uid = str(hit.get("uid", ""))
+					_move_start_pos_nm = hit.get("pos_nm", [0, 0])
+					_move_start_px = mb.position
+					_move_offset_px = Vector2.ZERO
 			else:
-				_set_selection("placement", str(hit.get("uid", "")), hit)
+				## release：若真的拖动（偏移 > 2 px）则调 move_placement 落盘
+				if _move_active and _move_offset_px.length() > 2.0:
+					_apply_move()
+				_move_active = false
+				_move_uid = ""
+				_move_offset_px = Vector2.ZERO
+				queue_redraw()
 	elif event is InputEventMouseMotion:
 		var mm := event as InputEventMouseMotion
 		if _drag_active:
 			_pan += mm.position - _drag_last
 			_drag_last = mm.position
+			queue_redraw()
+		if _move_active:
+			_move_offset_px = mm.position - _move_start_px
 			queue_redraw()
 		var nm := _px_to_nm(mm.position)
 		mouse_mm_changed.emit(Vector2(nm.x, nm.y) / 1_000_000.0)
@@ -183,6 +205,25 @@ func _gui_input(event: InputEvent) -> void:
 			_hovered_uid = new_hover
 			hover_changed.emit(_hovered_uid)
 			queue_redraw()
+
+
+func _apply_move() -> void:
+	if _sch_path == "" or _move_uid == "":
+		return
+	## offset_px → offset_nm
+	var offset_nm: Vector2 = _move_offset_px / (WORLD_PER_NM * _zoom)
+	var new_x: int = int(_move_start_pos_nm[0]) + int(offset_nm.x)
+	var new_y: int = int(_move_start_pos_nm[1]) + int(offset_nm.y)
+	var reg := CommandRegistry.new()
+	SchematicCommands.register(reg)
+	var r: Result = reg.call_method(
+		"schematic.move_placement",
+		{"path": _sch_path, "placement_uid": _move_uid, "pos_nm": [new_x, new_y]}
+	)
+	if r.ok:
+		reload_from_disk()
+	else:
+		push_error("move_placement 失败: %s" % r.message)
 
 
 func _find_placement_at(px: Vector2) -> Dictionary:
@@ -318,6 +359,8 @@ func _draw_placements() -> void:
 	for pl in _schematic.placements:
 		var pos: Array = pl.get("pos_nm", [0, 0])
 		var center := _nm_to_px(Vector2i(int(pos[0]), int(pos[1])))
+		if _move_active and str(pl.get("uid", "")) == _move_uid:
+			center += _move_offset_px
 		var ref: String = str(pl.get("reference", ""))
 		var comp_id: String = str(pl.get("component_ref", ""))
 		var sym_id := _symbol_id_for_component(comp_id)

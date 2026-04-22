@@ -15,6 +15,10 @@ static func register(registry: CommandRegistry) -> void:
 	registry.add("schematic.annotate", func(p): return _annotate(p))
 	registry.add("schematic.set_property", func(p): return _set_property(p))
 	registry.add("schematic.rotate_placement", func(p): return _rotate_placement(p))
+	registry.add("schematic.move_placement", func(p): return _move_placement(p))
+	registry.add("schematic.remove_placement", func(p): return _remove_placement(p))
+	registry.add("schematic.remove_net", func(p): return _remove_net(p))
+	registry.add("schematic.disconnect_pin", func(p): return _disconnect_pin(p))
 
 
 static func _load(path: String) -> Schematic:
@@ -202,6 +206,124 @@ static func _rotate_placement(params: Dictionary) -> Result:
 	if _save(path, s) != OK:
 		return Result.err(2, "write failed")
 	var r := Result.success({"path": path, "uid": uid, "rotation_deg": rot})
+	r.add_touched(path)
+	return r
+
+
+static func _move_placement(params: Dictionary) -> Result:
+	var path: String = str(params.get("path", ""))
+	var uid: String = str(params.get("placement_uid", ""))
+	if path == "" or uid == "":
+		return Result.err(1, "missing 'path' or 'placement_uid'")
+	if not params.has("pos_nm"):
+		return Result.err(1, "missing 'pos_nm'")
+	var pos: Array = params["pos_nm"]
+	if pos.size() != 2:
+		return Result.err(1, "pos_nm must be [x, y]")
+	var s := _load(path)
+	if s == null:
+		return Result.err(1, "schematic not found")
+	var pl: Dictionary = s.find_placement(uid)
+	if pl.is_empty():
+		return Result.err(1, "placement not found: %s" % uid)
+	pl["pos_nm"] = [int(pos[0]), int(pos[1])]
+	if _save(path, s) != OK:
+		return Result.err(2, "write failed")
+	var r := Result.success({"path": path, "uid": uid, "pos_nm": pl["pos_nm"]})
+	r.add_touched(path)
+	return r
+
+
+static func _remove_placement(params: Dictionary) -> Result:
+	var path: String = str(params.get("path", ""))
+	var uid: String = str(params.get("placement_uid", ""))
+	if path == "" or uid == "":
+		return Result.err(1, "missing 'path' or 'placement_uid'")
+	var s := _load(path)
+	if s == null:
+		return Result.err(1, "schematic not found")
+	var pl: Dictionary = s.find_placement(uid)
+	if pl.is_empty():
+		return Result.err(1, "placement not found: %s" % uid)
+	var ref: String = str(pl.get("reference", ""))
+	## 从 nets 中删除所有 ref.pin 引用；删除后若 net pins<2 则删 net
+	var remaining_nets: Array = []
+	var removed_nets: Array = []
+	for n in s.nets:
+		var pins: Array = n.get("pins", [])
+		var kept: Array = []
+		for pin_ref in pins:
+			var parts := str(pin_ref).split(".")
+			if parts.size() == 2 and parts[0] == ref:
+				continue
+			kept.append(pin_ref)
+		if kept.size() >= 2:
+			n["pins"] = kept
+			remaining_nets.append(n)
+		else:
+			removed_nets.append(str(n.get("id", "")))
+	s.nets = remaining_nets
+	var kept_placements: Array = []
+	for p in s.placements:
+		if str(p.get("uid", "")) != uid:
+			kept_placements.append(p)
+	s.placements = kept_placements
+	if _save(path, s) != OK:
+		return Result.err(2, "write failed")
+	var r := Result.success({"path": path, "uid": uid, "removed_nets": removed_nets})
+	r.add_touched(path)
+	return r
+
+
+static func _remove_net(params: Dictionary) -> Result:
+	var path: String = str(params.get("path", ""))
+	var net_id: String = str(params.get("net_id", ""))
+	if path == "" or net_id == "":
+		return Result.err(1, "missing 'path' or 'net_id'")
+	var s := _load(path)
+	if s == null:
+		return Result.err(1, "schematic not found")
+	if s.find_net(net_id).is_empty():
+		return Result.err(1, "net not found: %s" % net_id)
+	var kept: Array = []
+	for n in s.nets:
+		if str(n.get("id", "")) != net_id:
+			kept.append(n)
+	s.nets = kept
+	if _save(path, s) != OK:
+		return Result.err(2, "write failed")
+	var r := Result.success({"path": path, "net_id": net_id})
+	r.add_touched(path)
+	return r
+
+
+static func _disconnect_pin(params: Dictionary) -> Result:
+	var path: String = str(params.get("path", ""))
+	var pin_ref: String = str(params.get("pin", ""))
+	if path == "" or pin_ref == "":
+		return Result.err(1, "missing 'path' or 'pin'")
+	var s := _load(path)
+	if s == null:
+		return Result.err(1, "schematic not found")
+	var affected: Array = []
+	var kept_nets: Array = []
+	for n in s.nets:
+		var pins: Array = n.get("pins", [])
+		if pins.has(pin_ref):
+			var remaining: Array = []
+			for p in pins:
+				if str(p) != pin_ref:
+					remaining.append(p)
+			if remaining.size() >= 2:
+				n["pins"] = remaining
+				kept_nets.append(n)
+			affected.append(str(n.get("id", "")))
+		else:
+			kept_nets.append(n)
+	s.nets = kept_nets
+	if _save(path, s) != OK:
+		return Result.err(2, "write failed")
+	var r := Result.success({"path": path, "pin": pin_ref, "affected_nets": affected})
 	r.add_touched(path)
 	return r
 
