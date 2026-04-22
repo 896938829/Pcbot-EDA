@@ -1,0 +1,48 @@
+Scenes/Main.tscn
+  e19f493cc94e3188 1,5-9,20-22,24,26,28,30-46,50-57,59-61,63,65
+Runtime/ui/cli_console.gd
+  e19f493cc94e3188 1-9
+Runtime/ui/properties_panel.gd
+  e19f493cc94e3188 1-12
+Runtime/ui/log_panel.gd
+  e19f493cc94e3188 1-9
+Runtime/ui/status_bar.gd
+  e19f493cc94e3188 1-16
+Runtime/ui/main_window.gd
+  e19f493cc94e3188 3-7,9-11,13,17-22,30-31,33-42,71,90,94,103,111,117,122,127-137
+Runtime/ui/library_panel.gd
+  e19f493cc94e3188 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "7b62c86bf055f6f6d004034934dc38e2cc3efc15",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 180,
+      "total_deletions": 47,
+      "accepted_lines": 148,
+      "overriden_lines": 0
+    }
+  }
+}
