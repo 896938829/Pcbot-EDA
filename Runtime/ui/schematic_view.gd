@@ -34,6 +34,12 @@ var _move_uid: String = ""
 var _move_start_pos_nm: Array = [0, 0]
 var _move_start_px: Vector2 = Vector2.ZERO
 var _move_offset_px: Vector2 = Vector2.ZERO
+var _wire_first_pin: String = ""  ## "<reference>.<pin_number>"
+var _wire_first_px: Vector2 = Vector2.ZERO
+var _wire_mouse_px: Vector2 = Vector2.ZERO
+
+const PIN_HIT_RADIUS_PX: float = 8.0
+const PIN_DOT_RADIUS_PX: float = 3.0
 
 
 func _ready() -> void:
@@ -47,6 +53,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var k := event as InputEventKey
 	if k.keycode == KEY_DELETE and _selected_uid != "":
 		_delete_selected()
+		accept_event()
+	elif k.keycode == KEY_ESCAPE:
+		_cancel_wiring()
 		accept_event()
 
 
@@ -196,9 +205,14 @@ func _gui_input(event: InputEvent) -> void:
 			_drag_last = mb.position
 		elif mb.button_index == MOUSE_BUTTON_LEFT:
 			if mb.pressed:
+				var pin_hit := _find_pin_at(mb.position)
+				if not pin_hit.is_empty():
+					_handle_pin_click(pin_hit)
+					return
 				var hit := _find_placement_at(mb.position)
 				if hit.is_empty():
 					_set_selection("", "", {})
+					_cancel_wiring()
 				else:
 					_set_selection("placement", str(hit.get("uid", "")), hit)
 					_move_active = true
@@ -223,6 +237,9 @@ func _gui_input(event: InputEvent) -> void:
 		if _move_active:
 			_move_offset_px = mm.position - _move_start_px
 			queue_redraw()
+		if _wire_first_pin != "":
+			_wire_mouse_px = mm.position
+			queue_redraw()
 		var nm := _px_to_nm(mm.position)
 		mouse_mm_changed.emit(Vector2(nm.x, nm.y) / 1_000_000.0)
 		var hit := _find_placement_at(mm.position)
@@ -231,6 +248,65 @@ func _gui_input(event: InputEvent) -> void:
 			_hovered_uid = new_hover
 			hover_changed.emit(_hovered_uid)
 			queue_redraw()
+
+
+func _find_pin_at(px: Vector2) -> Dictionary:
+	if _schematic == null:
+		return {}
+	for pl in _schematic.placements:
+		var ref: String = str(pl.get("reference", ""))
+		var pos: Array = pl.get("pos_nm", [0, 0])
+		var sym_id := _symbol_id_for_component(str(pl.get("component_ref", "")))
+		var sym_dict: Dictionary = _symbol_cache.get(sym_id, {})
+		if not sym_dict.has("pins"):
+			continue
+		for pin in sym_dict["pins"]:
+			var pin_pos: Array = pin.get("pos", [0, 0])
+			var world_nm := Vector2i(int(pos[0]) + int(pin_pos[0]), int(pos[1]) + int(pin_pos[1]))
+			var pin_px := _nm_to_px(world_nm)
+			if (px - pin_px).length() <= PIN_HIT_RADIUS_PX:
+				return {
+					"pin_ref": "%s.%s" % [ref, str(pin.get("number", ""))],
+					"pin_px": pin_px,
+				}
+	return {}
+
+
+func _handle_pin_click(hit: Dictionary) -> void:
+	var pin_ref: String = str(hit.get("pin_ref", ""))
+	var pin_px: Vector2 = hit.get("pin_px", Vector2.ZERO)
+	if _wire_first_pin == "":
+		_wire_first_pin = pin_ref
+		_wire_first_px = pin_px
+		_wire_mouse_px = pin_px
+		queue_redraw()
+	else:
+		if pin_ref == _wire_first_pin:
+			_cancel_wiring()
+			return
+		_apply_wire(_wire_first_pin, pin_ref)
+		_cancel_wiring()
+
+
+func _apply_wire(a: String, b: String) -> void:
+	if _sch_path == "":
+		return
+	var reg := CommandRegistry.new()
+	SchematicCommands.register(reg)
+	var r: Result = reg.call_method(
+		"schematic.connect",
+		{"path": _sch_path, "net": "", "pins": [a, b]}
+	)
+	if r.ok:
+		reload_from_disk()
+	else:
+		push_error("connect 失败: %s" % r.message)
+
+
+func _cancel_wiring() -> void:
+	if _wire_first_pin != "":
+		_wire_first_pin = ""
+		queue_redraw()
 
 
 func _apply_move() -> void:
@@ -355,10 +431,35 @@ func _draw() -> void:
 		return
 	_draw_placements()
 	_draw_nets()
+	_draw_pins()
+	_draw_wire_preview()
 
 
 func _nm_to_px(p_nm: Vector2i) -> Vector2:
 	return Vector2(p_nm.x, p_nm.y) * WORLD_PER_NM * _zoom + _pan + size * 0.5
+
+
+func _draw_pins() -> void:
+	if _schematic == null:
+		return
+	for pl in _schematic.placements:
+		var pos: Array = pl.get("pos_nm", [0, 0])
+		var sym_id := _symbol_id_for_component(str(pl.get("component_ref", "")))
+		var sym_dict: Dictionary = _symbol_cache.get(sym_id, {})
+		if not sym_dict.has("pins"):
+			continue
+		for pin in sym_dict["pins"]:
+			var pin_pos: Array = pin.get("pos", [0, 0])
+			var world_nm := Vector2i(int(pos[0]) + int(pin_pos[0]), int(pos[1]) + int(pin_pos[1]))
+			var px := _nm_to_px(world_nm)
+			draw_circle(px, PIN_DOT_RADIUS_PX, Color(0.9, 0.7, 0.2))
+
+
+func _draw_wire_preview() -> void:
+	if _wire_first_pin == "":
+		return
+	draw_circle(_wire_first_px, PIN_DOT_RADIUS_PX + 2.0, Color(0.3, 0.9, 0.3))
+	draw_dashed_line(_wire_first_px, _wire_mouse_px, Color(0.3, 0.9, 0.3), 1.5)
 
 
 func _draw_grid() -> void:
