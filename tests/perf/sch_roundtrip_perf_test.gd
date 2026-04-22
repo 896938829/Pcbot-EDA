@@ -18,7 +18,7 @@ static func _make(n_pl: int, n_nets: int) -> Schematic:
 		s.placements.append({
 			"uid": "pl%d" % (i + 1),
 			"page_id": "p1",
-			"component_id": "COMP%05d" % (i % 200),
+			"component_ref": "COMP%05d" % (i % 200),
 			"reference": "R%d" % (i + 1),
 			"pos_nm": [(i % 50) * 5_000_000, (i / 50) * 5_000_000],
 			"rot_deg": 0,

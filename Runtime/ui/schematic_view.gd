@@ -106,7 +106,7 @@ func _draw_placements() -> void:
 		var pos: Array = pl.get("pos_nm", [0, 0])
 		var center := _nm_to_px(Vector2i(int(pos[0]), int(pos[1])))
 		var ref: String = str(pl.get("reference", ""))
-		var comp_id: String = str(pl.get("component_id", ""))
+		var comp_id: String = str(pl.get("component_ref", ""))
 		var sym_id := _symbol_id_for_component(comp_id)
 		var tex: ImageTexture = _texture_cache.get(sym_id, null) if sym_id != "" else null
 		var bbox_mm: Rect2 = _bbox_cache.get(sym_id, Rect2()) if sym_id != "" else Rect2()

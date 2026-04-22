@@ -21,7 +21,7 @@ static func run() -> Array:
 			s.placements.append({
 				"uid": "pl%d" % (i + 1),
 				"page_id": "p1",
-				"component_id": "X",
+				"component_ref": "X",
 				"reference": "R%d" % (i + 1),
 				"pos_nm": [0, 0],
 			})

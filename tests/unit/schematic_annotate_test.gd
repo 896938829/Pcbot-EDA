@@ -12,7 +12,7 @@ static func _make(path: String, refs: Array) -> void:
 		s.placements.append({
 			"uid": "pl%d" % (i + 1),
 			"page_id": "p1",
-			"component_id": "X",
+			"component_ref": "X",
 			"reference": str(refs[i]),
 			"pos_nm": [0, 0],
 			"rot_deg": 0,
