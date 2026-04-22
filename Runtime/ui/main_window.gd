@@ -9,6 +9,7 @@ extends Control
 @onready var _view: Control = $VBox/MainSplit/MidRightSplit/CenterSplit/SchematicView
 @onready var _library_panel: LibraryPanel = $VBox/MainSplit/LeftDock
 @onready var _properties_panel: PropertiesPanel = $VBox/MainSplit/MidRightSplit/RightDock
+@onready var _log_panel: LogPanel = $VBox/MainSplit/MidRightSplit/CenterSplit/BottomTabs/日志
 @onready var _status_bar: HBoxContainer = $VBox/StatusBar
 @onready var _menu_file: PopupMenu = $VBox/MenuBar/文件
 
@@ -122,6 +123,7 @@ func _load_project(path: String) -> void:
 
 	var lib_root: String = path.get_base_dir().path_join("library")
 	_library_panel.set_library_root(lib_root)
+	_log_panel.set_project_root(path.get_base_dir())
 	if project.schematic_refs.size() == 0:
 		_current_sch_path = ""
 		_view.set_schematic(null, "", "")
