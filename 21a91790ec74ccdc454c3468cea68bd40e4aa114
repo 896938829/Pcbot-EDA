@@ -1,0 +1,38 @@
+Runtime/ui/main_window.gd
+  e19f493cc94e3188 13,31-33,167-170
+Runtime/ui/status_bar.gd
+  e19f493cc94e3188 1,4-5,7-11,15-20,23-32,36-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "21a91790ec74ccdc454c3468cea68bd40e4aa114",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 62,
+      "total_deletions": 8,
+      "accepted_lines": 62,
+      "overriden_lines": 0
+    }
+  }
+}
