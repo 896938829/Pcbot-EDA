@@ -1,0 +1,46 @@
+tests/lightweight_runner.gd
+  e19f493cc94e3188 17
+Runtime/ui/main_window.gd
+  e19f493cc94e3188 11,15,28-31,126,136,149-161
+Runtime/ui/schematic_view.gd
+  e19f493cc94e3188 11,23,118-123,131-163,209-210,214-216,219-220,222-223
+Runtime/modules/schematic/commands.gd
+  e19f493cc94e3188 7-9,16-17,146-208
+tests/unit/schematic_set_property_test.gd
+  e19f493cc94e3188 1-127
+Runtime/ui/properties_panel.gd
+  e19f493cc94e3188 1,4-8,10-12,14-25,29-173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "0e9b79317b4e125fecf439914cd7d133b5893db9",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 493,
+      "total_deletions": 29,
+      "accepted_lines": 438,
+      "overriden_lines": 0
+    }
+  }
+}
