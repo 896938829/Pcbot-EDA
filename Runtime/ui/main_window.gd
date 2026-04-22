@@ -10,7 +10,7 @@ extends Control
 @onready var _library_panel: LibraryPanel = $VBox/MainSplit/LeftDock
 @onready var _properties_panel: PropertiesPanel = $VBox/MainSplit/MidRightSplit/RightDock
 @onready var _log_panel: LogPanel = $VBox/MainSplit/MidRightSplit/CenterSplit/BottomTabs/日志
-@onready var _status_bar: HBoxContainer = $VBox/StatusBar
+@onready var _status_bar: StatusBar = $VBox/StatusBar
 @onready var _menu_file: PopupMenu = $VBox/MenuBar/文件
 
 var _current_sch_path: String = ""
@@ -28,6 +28,9 @@ func _ready() -> void:
 
 	_view.selection_changed.connect(_properties_panel.on_selection_changed)
 	_view.schematic_changed.connect(_on_schematic_changed)
+	_view.zoom_changed.connect(_status_bar.set_zoom)
+	_view.mouse_mm_changed.connect(_status_bar.set_mouse_mm)
+	_view.selection_changed.connect(_on_view_selection_for_status)
 	_properties_panel.set_sch_path_getter(Callable(self, "_get_current_sch_path"))
 
 	var args := OS.get_cmdline_args()
@@ -161,3 +164,7 @@ func _on_schematic_changed() -> void:
 		_properties_panel.on_selection_changed("", "", {})
 	else:
 		_properties_panel.on_selection_changed("placement", str(sel.get("uid", "")), sel)
+
+
+func _on_view_selection_for_status(kind: String, _uid: String, data: Dictionary) -> void:
+	_status_bar.set_selection(kind, str(data.get("reference", "")))
