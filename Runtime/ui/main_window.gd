@@ -13,28 +13,66 @@ extends Control
 @onready var _status_bar: StatusBar = $VBox/StatusBar
 @onready var _menu_file: PopupMenu = $VBox/MenuBar/文件
 @onready var _menu_edit: PopupMenu = $VBox/MenuBar/编辑
+@onready var _menu_view: PopupMenu = $VBox/MenuBar/视图
+@onready var _menu_help: PopupMenu = $VBox/MenuBar/帮助
+@onready var _left_dock: Control = $VBox/MainSplit/LeftDock
+@onready var _right_dock: Control = $VBox/MainSplit/MidRightSplit/RightDock
+@onready var _bottom_tabs: Control = $VBox/MainSplit/MidRightSplit/CenterSplit/BottomTabs
 
 var _current_sch_path: String = ""
 var _undo: UndoStack = UndoStack.new()
+var _prefs: Prefs = Prefs.new()
+var _recent_submenu: PopupMenu
 
 enum EditMenuId { UNDO = 1, REDO = 2, DELETE = 3 }
+enum ViewMenuId { LEFT_DOCK = 1, RIGHT_DOCK = 2, BOTTOM_DOCK = 3, GRID = 4 }
+enum HelpMenuId { ABOUT = 1 }
+
+const APP_VERSION := "0.1.0 (M1.2)"
 
 enum FileMenuId { NEW = 1, OPEN = 2, DEMO = 3, QUIT = 9 }
+const RECENT_ID_BASE: int = 100  ## recent 项 id = base + index
 
 
 func _ready() -> void:
+	_prefs.load()
+
 	_menu_file.add_item("新建工程", FileMenuId.NEW)
 	_menu_file.add_item("打开工程", FileMenuId.OPEN)
 	_menu_file.add_item("载入 Demo", FileMenuId.DEMO)
+	_recent_submenu = PopupMenu.new()
+	_recent_submenu.name = "最近工程"
+	_recent_submenu.id_pressed.connect(_on_recent_picked)
+	_menu_file.add_child(_recent_submenu)
+	_menu_file.add_submenu_item("最近工程", "最近工程")
 	_menu_file.add_separator()
 	_menu_file.add_item("退出", FileMenuId.QUIT)
 	_menu_file.id_pressed.connect(_on_file_menu)
+	_rebuild_recent_menu()
 
 	_menu_edit.add_item("撤销 (Ctrl+Z)", EditMenuId.UNDO)
 	_menu_edit.add_item("重做 (Ctrl+Y)", EditMenuId.REDO)
 	_menu_edit.add_separator()
 	_menu_edit.add_item("删除选中 (Del)", EditMenuId.DELETE)
 	_menu_edit.id_pressed.connect(_on_edit_menu)
+
+	_menu_view.add_check_item("左侧元件库", ViewMenuId.LEFT_DOCK)
+	_menu_view.add_check_item("右侧属性", ViewMenuId.RIGHT_DOCK)
+	_menu_view.add_check_item("底部日志+CLI", ViewMenuId.BOTTOM_DOCK)
+	_menu_view.add_separator()
+	_menu_view.add_check_item("网格", ViewMenuId.GRID)
+	_menu_view.id_pressed.connect(_on_view_menu)
+	## apply 持久化偏好
+	_left_dock.visible = bool(_prefs.get_value("dock_left", true))
+	_right_dock.visible = bool(_prefs.get_value("dock_right", true))
+	_bottom_tabs.visible = bool(_prefs.get_value("dock_bottom", true))
+	_menu_view.set_item_checked(_menu_view.get_item_index(ViewMenuId.LEFT_DOCK), _left_dock.visible)
+	_menu_view.set_item_checked(_menu_view.get_item_index(ViewMenuId.RIGHT_DOCK), _right_dock.visible)
+	_menu_view.set_item_checked(_menu_view.get_item_index(ViewMenuId.BOTTOM_DOCK), _bottom_tabs.visible)
+	_menu_view.set_item_checked(_menu_view.get_item_index(ViewMenuId.GRID), true)
+
+	_menu_help.add_item("关于 Pcbot EDA", HelpMenuId.ABOUT)
+	_menu_help.id_pressed.connect(_on_help_menu)
 
 	_view.set_undo_stack(_undo)
 	_properties_panel.set_undo_stack(_undo)
@@ -69,6 +107,52 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_view.reload_from_disk()
 			_set_status("重做 · 栈 %d" % _undo.size())
 		accept_event()
+
+
+func _on_view_menu(id: int) -> void:
+	var idx := _menu_view.get_item_index(id)
+	var checked := not _menu_view.is_item_checked(idx)
+	_menu_view.set_item_checked(idx, checked)
+	match id:
+		ViewMenuId.LEFT_DOCK:
+			_left_dock.visible = checked
+			_prefs.set_value("dock_left", checked)
+		ViewMenuId.RIGHT_DOCK:
+			_right_dock.visible = checked
+			_prefs.set_value("dock_right", checked)
+		ViewMenuId.BOTTOM_DOCK:
+			_bottom_tabs.visible = checked
+			_prefs.set_value("dock_bottom", checked)
+		ViewMenuId.GRID:
+			_view.toggle_grid()
+
+
+func _rebuild_recent_menu() -> void:
+	_recent_submenu.clear()
+	var list: Array = _prefs.recent()
+	if list.is_empty():
+		_recent_submenu.add_item("(无)", RECENT_ID_BASE - 1)
+		_recent_submenu.set_item_disabled(0, true)
+		return
+	for i in list.size():
+		_recent_submenu.add_item(str(list[i]), RECENT_ID_BASE + i)
+
+
+func _on_recent_picked(id: int) -> void:
+	var list: Array = _prefs.recent()
+	var idx := id - RECENT_ID_BASE
+	if idx < 0 or idx >= list.size():
+		return
+	_load_project(str(list[idx]))
+
+
+func _on_help_menu(id: int) -> void:
+	if id == HelpMenuId.ABOUT:
+		var dlg := AcceptDialog.new()
+		dlg.title = "关于"
+		dlg.dialog_text = "Pcbot EDA %s\n\nAI 驱动的 PCB EDA 工具\nADR-0005: GUI 是一等编辑面\nCLI 仍是 AI 唯一接入面" % APP_VERSION
+		add_child(dlg)
+		dlg.popup_centered()
 
 
 func _on_edit_menu(id: int) -> void:
@@ -181,6 +265,8 @@ func _load_project(path: String) -> void:
 	var sch := Schematic.from_dict(sch_data)
 	_current_sch_path = sch_path
 	_undo.clear()
+	_prefs.add_recent(path)
+	_rebuild_recent_menu()
 	_view.set_schematic(sch, lib_root, sch_path)
 	_set_status(
 		(
