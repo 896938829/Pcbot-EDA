@@ -38,6 +38,32 @@ var _move_offset_px: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	_build_zoom_overlay()
+	focus_mode = Control.FOCUS_ALL
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.pressed:
+		return
+	var k := event as InputEventKey
+	if k.keycode == KEY_DELETE and _selected_uid != "":
+		_delete_selected()
+		accept_event()
+
+
+func _delete_selected() -> void:
+	if _sch_path == "" or _selected_uid == "":
+		return
+	var reg := CommandRegistry.new()
+	SchematicCommands.register(reg)
+	var r: Result = reg.call_method(
+		"schematic.remove_placement",
+		{"path": _sch_path, "placement_uid": _selected_uid}
+	)
+	if r.ok:
+		_set_selection("", "", {})
+		reload_from_disk()
+	else:
+		push_error("remove_placement 失败: %s" % r.message)
 
 
 func _build_zoom_overlay() -> void:
