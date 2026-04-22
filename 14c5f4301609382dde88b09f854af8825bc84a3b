@@ -1,0 +1,52 @@
+docs/skills/schematic/set_property.yaml
+  e19f493cc94e3188 1-25
+tests/integration/gui_edit_roundtrip_test.gd
+  e19f493cc94e3188 1-91
+docs/skills/schematic/remove_net.yaml
+  e19f493cc94e3188 1-18
+"docs/conventions/UI 手验清单.md"
+  e19f493cc94e3188 1-59
+docs/skills/schematic/disconnect_pin.yaml
+  e19f493cc94e3188 1-20
+docs/skills/schematic/remove_placement.yaml
+  e19f493cc94e3188 1-21
+docs/skills/schematic/move_placement.yaml
+  e19f493cc94e3188 1-23
+docs/skills/schematic/rotate_placement.yaml
+  e19f493cc94e3188 1-22
+tests/lightweight_runner.gd
+  e19f493cc94e3188 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "14c5f4301609382dde88b09f854af8825bc84a3b",
+  "prompts": {
+    "60dc292f8685bcc2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c0eeda05-c679-4432-adae-4f080ae70fe7",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    },
+    "e19f493cc94e3188": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7ed17c-7885-4dbe-b517-25a357d1592b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 280,
+      "total_deletions": 0,
+      "accepted_lines": 280,
+      "overriden_lines": 0
+    }
+  }
+}
