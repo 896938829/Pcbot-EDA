@@ -1,0 +1,25 @@
+name: schematic.set_property
+description: 修改单个 placement 的可白名单字段（reference / mirror）。
+triggers:
+  - 改 placement 的位号
+  - 翻转镜像
+params:
+  path: 原理图路径（必填）
+  placement_uid: 目标 placement uid（必填）
+  key: "reference | mirror（白名单）"
+  value: 新值（reference=String 非空，mirror=bool）
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.set_property
+    params:
+      path: "demo/led_blink.sch.json"
+      placement_uid: "pl1"
+      key: "reference"
+      value: "R99"
+common_errors:
+  - code: USER_ERROR
+    when: "key 不在白名单"
+  - code: USER_ERROR
+    when: "reference 与既有 placement 重名"

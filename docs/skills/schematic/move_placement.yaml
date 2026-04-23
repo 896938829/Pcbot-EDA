@@ -1,0 +1,23 @@
+name: schematic.move_placement
+description: 修改 placement 的 pos_nm 坐标。
+triggers:
+  - 把元件拖到新位置
+  - 对齐到栅格
+params:
+  path: 原理图路径（必填）
+  placement_uid: 目标 placement uid（必填）
+  pos_nm: "[x_nm, y_nm]，两元素 int 数组"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.move_placement
+    params:
+      path: "demo/led_blink.sch.json"
+      placement_uid: "pl1"
+      pos_nm: [20000000, 30000000]
+common_errors:
+  - code: USER_ERROR
+    when: "placement_uid 不存在"
+  - code: USER_ERROR
+    when: "pos_nm 不是 [x, y]"

@@ -77,7 +77,7 @@ static func _do_e2e() -> String:
 		if not res.ok: return "place %s: %s" % [p["ref"], res.message]
 		x += 30_000_000
 
-	## 连接——故意省略 C1.1 到 U1.2/U1.6，留一个悬空（触发 net.floating 或 placement.unconnected）。
+	## 连接——故意把 N_TIMING 先建成 1-pin 悬空（触发 net.floating error）。
 	var connects := [
 		{"net": "VCC", "pins": ["VCC1.1", "U1.8", "U1.4", "R1.1"]},
 		{"net": "GND", "pins": ["GND1.1", "U1.1", "C1.2"]},
@@ -85,7 +85,7 @@ static func _do_e2e() -> String:
 		{"net": "N_LED", "pins": ["R3.2", "D1.1"]},
 		{"net": "N_LED_K", "pins": ["D1.2", "GND1.1"]},
 		{"net": "N_THR", "pins": ["R1.2", "R2.1"]},
-		## 故意不连 U1.2 / U1.6 / C1.1 / R2.2 → 违例
+		{"net": "N_TIMING", "pins": ["R2.2"]},  ## 单 pin → net.floating error
 	]
 	for c in connects:
 		var res: Result = reg.call_method("schematic.connect", {
@@ -103,9 +103,9 @@ static func _do_e2e() -> String:
 	var before := Jsonl.read_all(diag_path).size()
 	if before <= 0: return "diagnostics empty"
 
-	## 补上缺失网络，消除违例
+	## 补上缺失网络，消除违例：N_TIMING 扩到 4 pin
 	var fixups := [
-		{"net": "N_THR", "pins": ["R2.2", "C1.1", "U1.2", "U1.6"]},
+		{"net": "N_TIMING", "pins": ["C1.1", "U1.2", "U1.6"]},
 	]
 	for f in fixups:
 		var res: Result = reg.call_method("schematic.connect", {

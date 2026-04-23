@@ -1,0 +1,22 @@
+name: schematic.rotate_placement
+description: 旋转 placement，rotation_deg 必须是 90 的倍数；自动对 360 取模。
+triggers:
+  - 旋转元件 90 度
+params:
+  path: 原理图路径（必填）
+  placement_uid: 目标 placement uid（必填）
+  rotation_deg: 目标角度（可超 360，内部 %360）
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.rotate_placement
+    params:
+      path: "demo/led_blink.sch.json"
+      placement_uid: "pl1"
+      rotation_deg: 90
+common_errors:
+  - code: USER_ERROR
+    when: "rotation_deg 不是 90 的倍数"
+  - code: USER_ERROR
+    when: "placement_uid 不存在"

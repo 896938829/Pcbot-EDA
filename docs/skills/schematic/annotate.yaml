@@ -1,16 +1,33 @@
 name: schematic.annotate
-description: 为 reference 以 "?" 结尾的元件自动编号（例如 R? -> R1 / R2）。
+description: 为 reference 以 "?" 结尾的元件自动编号（例如 R? -> R1 / R2）。按前缀独立分桶，
+  默认填补 gap：若 R1 / R3 已占，两个 R? 分别得 R2 / R4。可用 start_at 指定起始候选号。
 triggers:
   - 新放置的元件还没编号
+  - 大批粘贴后需要批量重新编号
 params:
   path: 原理图路径（必填）
-example:
-  request:
-    jsonrpc: "2.0"
-    id: 1
-    method: schematic.annotate
-    params:
-      path: "demo/led_blink.sch.json"
+  start_at: 可选 Dictionary，按前缀给起始候选号；从该号开始按递增跳过已占用号，
+    例如 {"R": 100, "U": 200}。未指定时各前缀从 1 起算。
+examples:
+  - description: 基本用法（填 gap）
+    request:
+      jsonrpc: "2.0"
+      id: 1
+      method: schematic.annotate
+      params:
+        path: "demo/led_blink.sch.json"
+  - description: 多前缀指定起始号
+    request:
+      jsonrpc: "2.0"
+      id: 2
+      method: schematic.annotate
+      params:
+        path: "demo/led_blink.sch.json"
+        start_at:
+          R: 100
+          U: 200
 common_errors:
+  - code: USER_ERROR
+    when: "缺 path 参数 / schematic 文件不存在"
   - code: SYSTEM_ERROR
     when: "写文件失败"

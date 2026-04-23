@@ -11,12 +11,19 @@ const TESTS: Array = [
 	"res://tests/unit/yaml_test.gd",
 	"res://tests/unit/result_test.gd",
 	"res://tests/unit/component_symbol_test.gd",
+	"res://tests/unit/svg_export_test.gd",
 	"res://tests/unit/schematic_test.gd",
+	"res://tests/unit/schematic_annotate_test.gd",
+	"res://tests/unit/schematic_set_property_test.gd",
+	"res://tests/unit/schematic_edit_primitives_test.gd",
+	"res://tests/unit/undo_stack_test.gd",
 	"res://tests/unit/library_index_test.gd",
 	"res://tests/unit/run_report_test.gd",
 	"res://tests/unit/diagnostics_log_test.gd",
 	"res://tests/unit/command_registry_test.gd",
 	"res://tests/integration/led_blink_e2e_test.gd",
+	"res://tests/integration/gui_edit_roundtrip_test.gd",
+	"res://tests/integration/cli_stdin_test.gd",
 ]
 
 

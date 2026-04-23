@@ -71,17 +71,9 @@ static func _export_svg(params: Dictionary) -> Result:
 	if data == null:
 		return Result.err(1, "symbol not found")
 	var sym := ComponentSymbol.from_dict(data)
-	var vb_mm: Array = params.get("viewbox_mm", [0.0, 0.0, 20.0, 20.0])
-	var shapes: Array = [
-		{"type": "rect", "x": 2, "y": 2, "w": 16, "h": 16, "stroke": "black", "stroke_width": 0.2, "fill": "none"},
-		{"type": "text", "x": 10, "y": 10, "font_size": 1.5, "text": sym.name},
-	]
-	for p in sym.pins:
-		var pos: Array = p.get("pos", [0, 0])
-		var x: float = UnitSystem.nm_to_mm(int(pos[0]))
-		var y: float = UnitSystem.nm_to_mm(int(pos[1]))
-		shapes.append({"type": "circle", "cx": x, "cy": y, "r": 0.4, "stroke": "black", "stroke_width": 0.15})
-	var we := SvgIO.write_symbol(svg_path, vb_mm, shapes)
+	var rendered: Dictionary = SvgIO.render_symbol(sym)
+	var vb_mm: Array = params.get("viewbox_mm", rendered["viewbox"])
+	var we := SvgIO.write_symbol(svg_path, vb_mm, rendered["shapes"])
 	if we != OK:
 		return Result.err(2, "svg write failed")
 	var r := Result.success({"svg_path": svg_path, "pin_count": sym.pins.size()})

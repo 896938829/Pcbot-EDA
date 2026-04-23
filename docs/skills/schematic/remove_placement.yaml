@@ -1,0 +1,21 @@
+name: schematic.remove_placement
+description: 删除 placement；连带删除引用该 placement 的 net 引脚；net pins<2 则整条 net 删除。
+triggers:
+  - 删除选中元件
+  - 清理无用元件
+params:
+  path: 原理图路径（必填）
+  placement_uid: 目标 placement uid（必填）
+returns:
+  removed_nets: "因 pins<2 被一并删除的 net id 列表"
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.remove_placement
+    params:
+      path: "demo/led_blink.sch.json"
+      placement_uid: "pl1"
+common_errors:
+  - code: USER_ERROR
+    when: "placement_uid 不存在"

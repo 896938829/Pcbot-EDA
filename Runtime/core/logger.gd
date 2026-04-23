@@ -4,6 +4,8 @@ extends Node
 
 enum Level { DEBUG, INFO, WARN, ERROR }
 
+signal log_emitted(level: int, module: String, message: String, fields: Dictionary)
+
 var min_level: int = Level.INFO
 
 
@@ -34,6 +36,7 @@ func _write(level: int, module: String, message: String, fields: Dictionary) -> 
 	for k in fields.keys():
 		line += " %s=%s" % [k, str(fields[k])]
 	printerr(line)
+	log_emitted.emit(level, module, message, fields)
 
 
 func _level_tag(level: int) -> String:

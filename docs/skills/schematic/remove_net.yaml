@@ -1,0 +1,18 @@
+name: schematic.remove_net
+description: 删除整条 net（按 net_id）。
+triggers:
+  - 拆掉一条不应存在的连接
+params:
+  path: 原理图路径（必填）
+  net_id: 目标 net id，如 "N1"（必填）
+example:
+  request:
+    jsonrpc: "2.0"
+    id: 1
+    method: schematic.remove_net
+    params:
+      path: "demo/led_blink.sch.json"
+      net_id: "N3"
+common_errors:
+  - code: USER_ERROR
+    when: "net_id 不存在"
