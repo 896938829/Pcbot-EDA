@@ -1,0 +1,40 @@
+Runtime/ui/properties_panel.gd
+  8acdc562671a1ffe 60-62,131-135,164-165
+Runtime/core/event_bus.gd
+  8acdc562671a1ffe 10-11
+Runtime/ui/schematic_view.gd
+  8acdc562671a1ffe 57-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "b0b7ffa05a0423aad550c9eec9a5b91b0a1e4157",
+  "prompts": {
+    "280b89f456be2a97": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b1420b42-4253-4022-9eef-c2ab89b6484e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 194,
+      "overriden_lines": 0
+    },
+    "8acdc562671a1ffe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7242f3a0-564b-4842-8c08-d556958bf18a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 19,
+      "total_deletions": 1,
+      "accepted_lines": 19,
+      "overriden_lines": 0
+    }
+  }
+}
