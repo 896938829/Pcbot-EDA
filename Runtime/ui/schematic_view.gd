@@ -212,11 +212,9 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
-			_zoom = clamp(_zoom * 1.15, 0.1, 20.0)
-			queue_redraw()
+			set_zoom(_zoom * 1.15)
 		elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
-			_zoom = clamp(_zoom / 1.15, 0.1, 20.0)
-			queue_redraw()
+			set_zoom(_zoom / 1.15)
 		elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 			_drag_active = mb.pressed
 			_drag_last = mb.position
