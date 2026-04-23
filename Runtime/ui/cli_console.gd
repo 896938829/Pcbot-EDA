@@ -95,11 +95,15 @@ static func _bbcode_escape(s: String) -> String:
 
 func _render_entry(req_text: String, resp: Dictionary) -> void:
 	var ts := Time.get_datetime_string_from_system(true)
-	## 整行上色更醒目；请求蓝，成功响应绿，错误响应红。
-	_history_view.append_text("[color=#6699ff][%s] ▶ %s[/color]\n" % [ts, _bbcode_escape(req_text)])
+	## ts 不加 []，避免 bbcode parser 把 [2026-...] 当残缺 tag 污染后续 color 状态。
+	## 整行上色：请求蓝，成功响应绿，错误响应红；再加 OK / ERR 字面标记，防色盲 / 渲染异常。
+	_history_view.append_text("[color=#6699ff]%s ▶ %s[/color]\n" % [ts, _bbcode_escape(req_text)])
 	var ok := bool(resp.get("ok", false)) and not resp.has("error")
 	var color := "#60d060" if ok else "#e05050"
-	_history_view.append_text("[color=%s]◀ %s[/color]\n\n" % [color, _bbcode_escape(JSON.stringify(resp))])
+	var tag := "OK" if ok else "ERR"
+	_history_view.append_text("[color=%s]◀ [%s] %s[/color]\n\n" % [
+		color, tag, _bbcode_escape(JSON.stringify(resp))
+	])
 
 
 func _on_input_key(event: InputEvent) -> void:

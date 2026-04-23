@@ -45,6 +45,7 @@ var _move_offset_px: Vector2 = Vector2.ZERO
 var _wire_first_pin: String = ""  ## "<reference>.<pin_number>"
 var _wire_first_px: Vector2 = Vector2.ZERO
 var _wire_mouse_px: Vector2 = Vector2.ZERO
+var _zoom_btn: Button  ## 右下角显示当前 zoom% 的按钮（同时点击回 100%）
 
 const PIN_HIT_RADIUS_PX: float = 8.0
 const PIN_DOT_RADIUS_PX: float = 3.0
@@ -142,10 +143,11 @@ func _build_zoom_overlay() -> void:
 	btn_plus.custom_minimum_size = Vector2(28, 24)
 	btn_plus.pressed.connect(zoom_in)
 	row.add_child(btn_plus)
-	var btn_100 := Button.new()
-	btn_100.text = "100%"
-	btn_100.pressed.connect(zoom_reset)
-	row.add_child(btn_100)
+	_zoom_btn = Button.new()
+	_zoom_btn.text = "%d%%" % int(_zoom * 100.0)
+	_zoom_btn.custom_minimum_size = Vector2(56, 24)
+	_zoom_btn.pressed.connect(zoom_reset)
+	row.add_child(_zoom_btn)
 	var btn_fit := Button.new()
 	btn_fit.text = "Fit"
 	btn_fit.pressed.connect(zoom_fit)
@@ -455,6 +457,8 @@ func get_zoom() -> float:
 
 func set_zoom(z: float) -> void:
 	_zoom = clamp(z, 0.1, 20.0)
+	if _zoom_btn != null:
+		_zoom_btn.text = "%d%%" % int(_zoom * 100.0)
 	queue_redraw()
 	zoom_changed.emit(_zoom)
 
