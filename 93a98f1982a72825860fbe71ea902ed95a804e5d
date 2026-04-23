@@ -1,0 +1,36 @@
+Runtime/ui/schematic_view.gd
+  8acdc562671a1ffe 29,359-366,519,547-549
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "93a98f1982a72825860fbe71ea902ed95a804e5d",
+  "prompts": {
+    "280b89f456be2a97": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b1420b42-4253-4022-9eef-c2ab89b6484e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 194,
+      "overriden_lines": 0
+    },
+    "8acdc562671a1ffe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7242f3a0-564b-4842-8c08-d556958bf18a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 0,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    }
+  }
+}
