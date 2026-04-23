@@ -1,0 +1,42 @@
+tests/unit/schematic_edit_primitives_test.gd
+  8acdc562671a1ffe 125-167
+Runtime/modules/schematic/commands.gd
+  8acdc562671a1ffe 127-129,136-141,146-149,151-152,156-163,267-276,282,286-297,313-319,355,368,374-379
+Runtime/ui/schematic_view.gd
+  8acdc562671a1ffe 83-84,86-116,347-348,350-370
+tests/integration/gui_edit_roundtrip_test.gd
+  8acdc562671a1ffe 91-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "83b7ec040e5242379e0bfded278df561b166e7fb",
+  "prompts": {
+    "280b89f456be2a97": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b1420b42-4253-4022-9eef-c2ab89b6484e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 194,
+      "overriden_lines": 0
+    },
+    "8acdc562671a1ffe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7242f3a0-564b-4842-8c08-d556958bf18a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 238,
+      "total_deletions": 17,
+      "accepted_lines": 237,
+      "overriden_lines": 0
+    }
+  }
+}
