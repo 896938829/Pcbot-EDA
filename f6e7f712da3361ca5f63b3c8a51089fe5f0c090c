@@ -1,0 +1,25 @@
+docs/plan/实现计划-M2.md
+  7aae2c09eb2a56a1 1-271
+docs/plan/实现计划-M2-手验清单.md
+  7aae2c09eb2a56a1 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "f6e7f712da3361ca5f63b3c8a51089fe5f0c090c",
+  "prompts": {
+    "7aae2c09eb2a56a1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8971287-c290-4a5a-bdc8-00e1b9c508c3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 686,
+      "total_deletions": 5,
+      "accepted_lines": 686,
+      "overriden_lines": 0
+    }
+  }
+}
