@@ -54,6 +54,13 @@ func _ready() -> void:
 	_build_zoom_overlay()
 	focus_mode = Control.FOCUS_ALL
 	clip_contents = true
+	EventBus.schematic_disk_changed.connect(_on_disk_changed)
+
+
+## 外部（PropertiesPanel 等）改落盘后广播到这里，匹配当前 path 则 reload。
+func _on_disk_changed(path: String) -> void:
+	if path != "" and path == _sch_path:
+		reload_from_disk()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

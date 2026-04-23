@@ -57,6 +57,9 @@ func _ready() -> void:
 	for deg in ROTATIONS:
 		_rot_option.add_item(str(deg))
 	_rot_option.item_selected.connect(_on_rot_selected)
+	## reference 回车会把焦点冒泡到下一个 FOCUS_ALL 控件（即 OptionButton），
+	## Enter 再被吃掉触发下拉。限定只能点击聚焦，避免键盘抢焦。
+	_rot_option.focus_mode = Control.FOCUS_CLICK
 	add_child(_rot_option)
 
 	_mirror_check = CheckBox.new()
@@ -125,7 +128,11 @@ func _sch_path() -> String:
 func _call(method: String, params: Dictionary) -> Result:
 	var reg := CommandRegistry.new()
 	SchematicCommands.register(reg)
-	return reg.call_method(method, params)
+	var r: Result = reg.call_method(method, params)
+	## PropertiesPanel 不持有 SchematicView 引用；走 EventBus 广播让 view 按 path 自行 reload。
+	if r.ok:
+		EventBus.schematic_disk_changed.emit(str(params.get("path", "")))
+	return r
 
 
 func _push_undo(forward: Dictionary, inverse: Dictionary) -> void:
@@ -154,6 +161,8 @@ func _on_reference_submitted(text: String) -> void:
 		_status.text = "reference = %s" % text
 	else:
 		_status.text = "失败: %s" % r.message
+	## 提交后显式释放焦点，避免 Enter 冒泡到下一个控件触发意外操作。
+	_ref_edit.release_focus()
 
 
 func _on_rot_selected(idx: int) -> void:

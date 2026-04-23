@@ -7,6 +7,8 @@ signal component_added(data: Dictionary)
 signal schematic_net_changed(data: Dictionary)
 signal rule_violated(data: Dictionary)
 signal run_completed(data: Dictionary)
+## 原理图文件落盘后广播，订阅方（如 SchematicView）按 path 匹配自行 reload。
+signal schematic_disk_changed(path: String)
 
 
 func emit_domain(event: String, payload: Dictionary) -> void:
