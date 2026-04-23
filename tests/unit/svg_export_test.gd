@@ -63,6 +63,22 @@ static func run() -> Array:
 			return "expected outline rect, got %d rects" % rects
 		return ""))
 
+	r.append(Assert.case("bbox_from_pins_when_all_zero", func():
+		var sym := ComponentSymbol.new()
+		sym.bbox_nm = [0, 0, 0, 0]
+		sym.pins = [
+			{"number": "1", "name": "A", "pos": [0, 0], "dir": "left"},
+			{"number": "2", "name": "B", "pos": [10_000_000, 5_000_000], "dir": "right"},
+		]
+		var rendered := SvgIO.render_symbol(sym)
+		var vb: Array = rendered["viewbox"]
+		## pins span 0..10 mm x 0..5 mm → +2mm pad → [-2, -2, 14, 9]
+		if abs(float(vb[0]) - (-2.0)) > 0.01 or abs(float(vb[1]) - (-2.0)) > 0.01:
+			return "vb=%s expected origin [-2,-2]" % str(vb)
+		if abs(float(vb[2]) - 14.0) > 0.01 or abs(float(vb[3]) - 9.0) > 0.01:
+			return "vb=%s expected size [14,9]" % str(vb)
+		return ""))
+
 	r.append(Assert.case("polygon_outline_when_metadata_set", func():
 		var sym := ComponentSymbol.new()
 		sym.bbox_nm = [0, 0, 10_000_000, 10_000_000]

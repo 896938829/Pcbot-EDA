@@ -99,8 +99,38 @@ static func _shape(s: Dictionary) -> String:
 ## 外形优先级：metadata.outline_shape == "circle" → 圆；"polygon" + outline_points_mm → 多边形；
 ##             否则按 bbox_nm 画矩形。
 ## 引脚：圆点 + 引脚编号文本（外侧）+ 方向短线（按 dir）；name 不为空时绘内侧文本。
+## bbox 全零或缺失时，从引脚坐标推导 nm bbox。
+## 保留非零 bbox 优先级，兼容历史符号。
+static func _bbox_from_pins(sym: ComponentSymbol) -> Array:
+	if sym.pins.is_empty():
+		return [0, 0, 0, 0]
+	var minx := INF
+	var miny := INF
+	var maxx := -INF
+	var maxy := -INF
+	for p in sym.pins:
+		var pos: Array = p.get("pos", [0, 0])
+		var px := float(pos[0])
+		var py := float(pos[1])
+		minx = min(minx, px)
+		miny = min(miny, py)
+		maxx = max(maxx, px)
+		maxy = max(maxy, py)
+	if minx == INF:
+		return [0, 0, 0, 0]
+	return [int(minx), int(miny), int(maxx), int(maxy)]
+
+
+static func _bbox_is_zero(b: Array) -> bool:
+	if b.size() != 4:
+		return true
+	return int(b[0]) == 0 and int(b[1]) == 0 and int(b[2]) == 0 and int(b[3]) == 0
+
+
 static func render_symbol(sym: ComponentSymbol) -> Dictionary:
 	var bbox: Array = sym.bbox_nm if sym.bbox_nm.size() == 4 else [0, 0, 0, 0]
+	if _bbox_is_zero(bbox):
+		bbox = _bbox_from_pins(sym)
 	var x0_mm := UnitSystem.nm_to_mm(int(bbox[0]))
 	var y0_mm := UnitSystem.nm_to_mm(int(bbox[1]))
 	var x1_mm := UnitSystem.nm_to_mm(int(bbox[2]))
