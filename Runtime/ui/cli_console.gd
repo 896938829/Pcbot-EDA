@@ -87,12 +87,18 @@ func _on_submit(text: String) -> void:
 	_history_index = -1
 
 
+## RichTextLabel 的 append_text 会解析 [xxx] 为 bbcode。JSON 里的 []
+## 会把响应渲染成空白 tag，颜色 tag 之后的内容也被吃掉。转义后再塞入。
+static func _bbcode_escape(s: String) -> String:
+	return s.replace("[", "[lb]").replace("]", "[rb]")
+
+
 func _render_entry(req_text: String, resp: Dictionary) -> void:
 	var ts := Time.get_datetime_string_from_system(true)
-	_history_view.append_text("[color=#6699ff][%s] ▶[/color] %s\n" % [ts, req_text])
+	_history_view.append_text("[color=#6699ff][%s] ▶[/color] %s\n" % [ts, _bbcode_escape(req_text)])
 	var ok := bool(resp.get("ok", false)) and not resp.has("error")
 	var color := "#60d060" if ok else "#e05050"
-	_history_view.append_text("[color=%s]◀[/color] %s\n\n" % [color, JSON.stringify(resp)])
+	_history_view.append_text("[color=%s]◀[/color] %s\n\n" % [color, _bbcode_escape(JSON.stringify(resp))])
 
 
 func _on_input_key(event: InputEvent) -> void:
