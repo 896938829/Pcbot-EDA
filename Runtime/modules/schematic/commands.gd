@@ -124,25 +124,43 @@ static func _connect(params: Dictionary) -> Result:
 	if net_name != "":
 		net_dict = s.find_net_by_name(net_name)
 	var is_new := net_dict.is_empty()
+	var result_net_id := ""
+	var result_net_name := net_name
+	var added_pins: Array = []
 	if is_new:
 		var n := SchNet.new()
 		n.id = s.next_net_id()
 		n.name = net_name if net_name != "" else n.id
 		n.pins = []
 		for p in pins:
-			if not n.pins.has(str(p)):
-				n.pins.append(str(p))
+			var ps := str(p)
+			if not n.pins.has(ps):
+				n.pins.append(ps)
+				added_pins.append(ps)
+		result_net_id = n.id
+		result_net_name = n.name
 		s.nets.append(n.to_dict())
 	else:
 		var existing_pins: Array = net_dict.get("pins", [])
 		for p in pins:
-			if not existing_pins.has(str(p)):
-				existing_pins.append(str(p))
+			var ps2 := str(p)
+			if not existing_pins.has(ps2):
+				existing_pins.append(ps2)
+				added_pins.append(ps2)
 		net_dict["pins"] = existing_pins
+		result_net_id = str(net_dict.get("id", ""))
+		result_net_name = str(net_dict.get("name", net_name))
 
 	if _save(path, s) != OK:
 		return Result.err(2, "write failed")
-	var r := Result.success({"path": path, "net": net_name, "pin_count": pins.size()})
+	var r := Result.success({
+		"path": path,
+		"net": result_net_name,
+		"net_id": result_net_id,
+		"is_new": is_new,
+		"added_pins": added_pins,
+		"pin_count": pins.size(),
+	})
 	r.add_touched(path)
 	return r
 
@@ -246,15 +264,37 @@ static func _remove_placement(params: Dictionary) -> Result:
 	if pl.is_empty():
 		return Result.err(1, "placement not found: %s" % uid)
 	var ref: String = str(pl.get("reference", ""))
+	## 删除前快照 placement 与受影响 nets，供 undo 重建。
+	var placement_snapshot: Dictionary = {
+		"page_id": str(pl.get("page_id", "p1")),
+		"component_ref": str(pl.get("component_ref", "")),
+		"reference": ref,
+		"pos_nm": (pl.get("pos_nm", [0, 0]) as Array).duplicate(),
+		"rotation_deg": int(pl.get("rotation_deg", 0)),
+		"mirror": bool(pl.get("mirror", false)),
+	}
+	var net_snapshots: Array = []
 	## 从 nets 中删除所有 ref.pin 引用；删除后若 net pins<2 则删 net
 	var remaining_nets: Array = []
 	var removed_nets: Array = []
 	for n in s.nets:
 		var pins: Array = n.get("pins", [])
-		var kept: Array = []
+		var touched := false
 		for pin_ref in pins:
 			var parts := str(pin_ref).split(".")
 			if parts.size() == 2 and parts[0] == ref:
+				touched = true
+				break
+		if touched:
+			net_snapshots.append({
+				"id": str(n.get("id", "")),
+				"name": str(n.get("name", n.get("id", ""))),
+				"pins": (pins as Array).duplicate(),
+			})
+		var kept: Array = []
+		for pin_ref in pins:
+			var parts2 := str(pin_ref).split(".")
+			if parts2.size() == 2 and parts2[0] == ref:
 				continue
 			kept.append(pin_ref)
 		if kept.size() >= 2:
@@ -270,7 +310,13 @@ static func _remove_placement(params: Dictionary) -> Result:
 	s.placements = kept_placements
 	if _save(path, s) != OK:
 		return Result.err(2, "write failed")
-	var r := Result.success({"path": path, "uid": uid, "removed_nets": removed_nets})
+	var r := Result.success({
+		"path": path,
+		"uid": uid,
+		"removed_nets": removed_nets,
+		"placement_snapshot": placement_snapshot,
+		"net_snapshots": net_snapshots,
+	})
 	r.add_touched(path)
 	return r
 
@@ -306,6 +352,7 @@ static func _disconnect_pin(params: Dictionary) -> Result:
 	if s == null:
 		return Result.err(1, "schematic not found")
 	var affected: Array = []
+	var affected_names: Array = []
 	var kept_nets: Array = []
 	for n in s.nets:
 		var pins: Array = n.get("pins", [])
@@ -318,12 +365,18 @@ static func _disconnect_pin(params: Dictionary) -> Result:
 				n["pins"] = remaining
 				kept_nets.append(n)
 			affected.append(str(n.get("id", "")))
+			affected_names.append(str(n.get("name", n.get("id", ""))))
 		else:
 			kept_nets.append(n)
 	s.nets = kept_nets
 	if _save(path, s) != OK:
 		return Result.err(2, "write failed")
-	var r := Result.success({"path": path, "pin": pin_ref, "affected_nets": affected})
+	var r := Result.success({
+		"path": path,
+		"pin": pin_ref,
+		"affected_nets": affected,
+		"affected_net_names": affected_names,
+	})
 	r.add_touched(path)
 	return r
 

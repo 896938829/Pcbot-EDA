@@ -122,4 +122,47 @@ static func run() -> Array:
 		var s := _load_s(abs)
 		return Assert.eq(s.find_net("N1").is_empty(), true)))
 
+	r.append(Assert.case("connect: 新 net → result.is_new=true + net_id + added_pins", func():
+		_make(abs)
+		var res: Result = _reg().call_method(
+			"schematic.connect", {"path": abs, "net": "NET_NEW", "pins": ["R1.1", "R2.1"]}
+		)
+		if not res.ok:
+			return "call failed: %s" % res.message
+		if not bool(res.data.get("is_new", false)):
+			return "is_new should be true, got %s" % res.data
+		if str(res.data.get("net_id", "")) == "":
+			return "net_id missing"
+		var added: Array = res.data.get("added_pins", [])
+		if added.size() != 2:
+			return "added_pins expect 2, got %s" % added
+		return ""))
+
+	r.append(Assert.case("connect: 合并已有 net → is_new=false + added_pins 仅新增", func():
+		_make(abs)
+		## N1 已有 R1.1/R2.1；再 connect R1.1 + C1.1（C1.1 是新）
+		var res: Result = _reg().call_method(
+			"schematic.connect", {"path": abs, "net": "NET_A", "pins": ["R1.1", "C1.1"]}
+		)
+		if not res.ok:
+			return "call failed: %s" % res.message
+		if bool(res.data.get("is_new", true)):
+			return "is_new should be false"
+		var added: Array = res.data.get("added_pins", [])
+		if added.size() != 1 or str(added[0]) != "C1.1":
+			return "added_pins expect [C1.1], got %s" % added
+		return ""))
+
+	r.append(Assert.case("disconnect_pin: result.affected_net_names 含 net 名", func():
+		_make(abs)
+		var res: Result = _reg().call_method(
+			"schematic.disconnect_pin", {"path": abs, "pin": "C1.1"}
+		)
+		if not res.ok:
+			return "call failed: %s" % res.message
+		var names: Array = res.data.get("affected_net_names", [])
+		if not names.has("NET_B"):
+			return "expect NET_B in affected_net_names, got %s" % names
+		return ""))
+
 	return r

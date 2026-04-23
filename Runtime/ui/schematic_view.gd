@@ -80,11 +80,40 @@ func _delete_selected() -> void:
 		return
 	var reg := CommandRegistry.new()
 	SchematicCommands.register(reg)
-	var r: Result = reg.call_method(
-		"schematic.remove_placement",
-		{"path": _sch_path, "placement_uid": _selected_uid}
-	)
+	var forward_params: Dictionary = {"path": _sch_path, "placement_uid": _selected_uid}
+	var r: Result = reg.call_method("schematic.remove_placement", forward_params)
 	if r.ok:
+		if _undo_stack != null:
+			## inverse: 先 place_component 重建 placement（新 uid，reference 不变），
+			## 再对每个原 net 执行 connect(name, pins) 恢复连线。pins 用 reference.number
+			## 寻址，uid 变化不影响正确性。
+			var snap: Dictionary = r.data.get("placement_snapshot", {})
+			var nets: Array = r.data.get("net_snapshots", [])
+			var inverse: Array = [{
+				"method": "schematic.place_component",
+				"params": {
+					"path": _sch_path,
+					"page_id": snap.get("page_id", "p1"),
+					"component_ref": snap.get("component_ref", ""),
+					"reference": snap.get("reference", ""),
+					"pos_nm": snap.get("pos_nm", [0, 0]),
+					"rotation_deg": snap.get("rotation_deg", 0),
+					"mirror": snap.get("mirror", false),
+				},
+			}]
+			for net_snap in nets:
+				inverse.append({
+					"method": "schematic.connect",
+					"params": {
+						"path": _sch_path,
+						"net": net_snap.get("name", ""),
+						"pins": net_snap.get("pins", []),
+					},
+				})
+			_undo_stack.push({
+				"forward": [{"method": "schematic.remove_placement", "params": forward_params}],
+				"inverse": inverse,
+			})
 		_set_selection("", "", {})
 		reload_from_disk()
 	else:
@@ -315,11 +344,30 @@ func _apply_wire(a: String, b: String) -> void:
 		return
 	var reg := CommandRegistry.new()
 	SchematicCommands.register(reg)
-	var r: Result = reg.call_method(
-		"schematic.connect",
-		{"path": _sch_path, "net": "", "pins": [a, b]}
-	)
+	var forward_params: Dictionary = {"path": _sch_path, "net": "", "pins": [a, b]}
+	var r: Result = reg.call_method("schematic.connect", forward_params)
 	if r.ok:
+		if _undo_stack != null:
+			## inverse: 新建 net → remove_net(net_id)；合并已有 → 仅对 added_pins
+			## 逐个 disconnect_pin。
+			var is_new := bool(r.data.get("is_new", false))
+			var inverse: Array = []
+			if is_new:
+				inverse.append({
+					"method": "schematic.remove_net",
+					"params": {"path": _sch_path, "net_id": str(r.data.get("net_id", ""))},
+				})
+			else:
+				for pin_ref in r.data.get("added_pins", []):
+					inverse.append({
+						"method": "schematic.disconnect_pin",
+						"params": {"path": _sch_path, "pin": str(pin_ref)},
+					})
+			if not inverse.is_empty():
+				_undo_stack.push({
+					"forward": [{"method": "schematic.connect", "params": forward_params}],
+					"inverse": inverse,
+				})
 		reload_from_disk()
 	else:
 		push_error("connect 失败: %s" % r.message)

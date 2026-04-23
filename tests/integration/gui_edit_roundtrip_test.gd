@@ -88,4 +88,81 @@ static func run() -> Array:
 		var s3 := Schematic.from_dict(JsonStable.read_file(abs))
 		return Assert.eq(s3.placements.size(), 2)))
 
+	r.append(Assert.case("remove_placement → inverse 重建 roundtrip", func():
+		var p := ProjectSettings.globalize_path("user://p7_remove_undo_roundtrip.sch.json")
+		if FileAccess.file_exists(p):
+			DirAccess.remove_absolute(p)
+		var rg := _reg()
+		var n0: Result = rg.call_method("schematic.new", {"path": p, "id": "ru"})
+		if not n0.ok:
+			return "new: %s" % n0.message
+		## 两个元件 + 一条连线，确保 remove 会触发 net 快照
+		var pa: Result = rg.call_method("schematic.place_component", {
+			"path": p, "component_ref": "R", "reference": "R1", "pos_nm": [0, 0],
+		})
+		if not pa.ok:
+			return "place R1: %s" % pa.message
+		var pb: Result = rg.call_method("schematic.place_component", {
+			"path": p, "component_ref": "R", "reference": "R2", "pos_nm": [5_000_000, 0],
+		})
+		if not pb.ok:
+			return "place R2: %s" % pb.message
+		var cn: Result = rg.call_method("schematic.connect", {
+			"path": p, "net": "NET_X", "pins": ["R1.1", "R2.1"],
+		})
+		if not cn.ok:
+			return "connect: %s" % cn.message
+		var before = JsonStable.read_file(p)
+		var r1_uid := str(Schematic.from_dict(before).find_placement_by_ref("R1").get("uid", ""))
+
+		## forward: remove R1
+		var rm: Result = rg.call_method("schematic.remove_placement", {
+			"path": p, "placement_uid": r1_uid,
+		})
+		if not rm.ok:
+			return "remove: %s" % rm.message
+		var snap: Dictionary = rm.data.get("placement_snapshot", {})
+		if snap.is_empty():
+			return "placement_snapshot missing"
+		var nets: Array = rm.data.get("net_snapshots", [])
+		if nets.is_empty():
+			return "net_snapshots missing"
+
+		## inverse: place_component + connect 每个 net 快照
+		var ipa: Result = rg.call_method("schematic.place_component", {
+			"path": p,
+			"page_id": snap.get("page_id", "p1"),
+			"component_ref": snap.get("component_ref", ""),
+			"reference": snap.get("reference", ""),
+			"pos_nm": snap.get("pos_nm", [0, 0]),
+			"rotation_deg": snap.get("rotation_deg", 0),
+			"mirror": snap.get("mirror", false),
+		})
+		if not ipa.ok:
+			return "inverse place: %s" % ipa.message
+		for net_snap in nets:
+			var icn: Result = rg.call_method("schematic.connect", {
+				"path": p,
+				"net": net_snap.get("name", ""),
+				"pins": net_snap.get("pins", []),
+			})
+			if not icn.ok:
+				return "inverse connect: %s" % icn.message
+
+		## 状态一致（placements + nets.pins 相等；uid 允许不同）
+		var after := Schematic.from_dict(JsonStable.read_file(p))
+		if after.placements.size() != 2:
+			return "placements size=%d expect 2" % after.placements.size()
+		if after.find_placement_by_ref("R1").is_empty():
+			return "R1 not restored"
+		if after.find_placement_by_ref("R2").is_empty():
+			return "R2 not restored"
+		var net_x: Dictionary = after.find_net_by_name("NET_X")
+		if net_x.is_empty():
+			return "NET_X not restored"
+		var pins_after: Array = net_x.get("pins", [])
+		if not (pins_after.has("R1.1") and pins_after.has("R2.1")):
+			return "pins not restored: %s" % pins_after
+		return ""))
+
 	return r
