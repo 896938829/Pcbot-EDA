@@ -95,10 +95,11 @@ static func _bbcode_escape(s: String) -> String:
 
 func _render_entry(req_text: String, resp: Dictionary) -> void:
 	var ts := Time.get_datetime_string_from_system(true)
-	_history_view.append_text("[color=#6699ff][%s] ▶[/color] %s\n" % [ts, _bbcode_escape(req_text)])
+	## 整行上色更醒目；请求蓝，成功响应绿，错误响应红。
+	_history_view.append_text("[color=#6699ff][%s] ▶ %s[/color]\n" % [ts, _bbcode_escape(req_text)])
 	var ok := bool(resp.get("ok", false)) and not resp.has("error")
 	var color := "#60d060" if ok else "#e05050"
-	_history_view.append_text("[color=%s]◀[/color] %s\n\n" % [color, _bbcode_escape(JSON.stringify(resp))])
+	_history_view.append_text("[color=%s]◀ %s[/color]\n\n" % [color, _bbcode_escape(JSON.stringify(resp))])
 
 
 func _on_input_key(event: InputEvent) -> void:
