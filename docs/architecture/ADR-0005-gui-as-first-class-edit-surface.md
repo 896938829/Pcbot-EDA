@@ -69,6 +69,32 @@ M1.2 起确立以下原则：
 - `.pcbot/` 白名单（`last-run.json` / `diagnostics.jsonl` / `commit-msg`）不因 GUI 编辑能力
   扩张而新增文件；新增须走新 ADR。
 
+## M1.2 / M1.2.1 实装纪要
+
+截至 2026-04-23（M1.2 stable + M1.2.1 GUI 修复收敛）：
+
+- **新增 CLI 方法**（决策 §约束 清单全部落地）：`schematic.move_placement` /
+  `remove_placement` / `remove_net` / `set_property` / `rotate_placement` /
+  `disconnect_pin`。全部在 `Runtime/modules/schematic/commands.gd::register`。
+- **UndoStack 覆盖**（`Runtime/ui/undo_stack.gd`）：8 个编辑命令的 forward/inverse
+  已齐——`place_component` / `move_placement` / `rotate_placement` / `set_property`
+  （M1.2 P13）+ `remove_placement` / `connect` / `disconnect_pin`（M1.2.1 P7）。
+  inverse 中 `remove_placement` 通过 Result.data 的 `placement_snapshot` + `net_snapshots`
+  重建（新 uid，pin ref 按 reference.number 寻址）；`connect` 按 `is_new` / `added_pins`
+  走 `remove_net` 或 `disconnect_pin`。
+- **UI 组件清单**（`Runtime/ui/`）：`main_window.gd` / `schematic_view.gd` /
+  `properties_panel.gd` / `library_panel.gd` / `log_viewer.gd` / `status_bar.gd` /
+  `cli_console.gd` / `undo_stack.gd`。CliConsole 在进程内复用同一 `CommandRegistry`
+  + 全部 `*Commands.register`，无影子 registry。
+- **UI 与落盘联动**：`EventBus.schematic_disk_changed(path)` 作为"落盘后通知"信号，
+  `SchematicView._ready` 订阅；无法直接持 view 引用的 `PropertiesPanel` 改文件后
+  emit 该信号触发 reload。详见 [架构设计 §9](架构设计.md#9-事件总线)。
+- **格式/尺寸**：SVG 渲染 `SvgIO.render_symbol` 支持 `bbox_nm` 全零时按 pins 推导
+  viewbox，向后兼容非零 bbox 符号。
+- **未入 M1.2.1 的 GUI 能力**（推 M2）：框选 / net / wire 选中高亮 / 旋转 placement
+  的引脚坐标 2D 仿射变换 / 多 schematic tab / 跨 placement 剪贴板 /
+  `.sym.svg` 独立美化图形。
+
 ## 触发重审本 ADR 的条件
 
 任一项满足即需要新 ADR 更替或补充：

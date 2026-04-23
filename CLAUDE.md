@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目定位
 
-Pcbot EDA — 以 AI 为设计主体的 PCB EDA 工具，Godot 4.6 承载。**AI 通过 CLI 驱动设计（原理图 → 布局 → 布线 → 审查），编辑器被动渲染**。M1 聚焦：元件库 + 原理图数据模型 + CLI 骨架 + AI 中间文件，只读 GUI。详细里程碑范围见 [docs/plan/实现计划-M1.md](docs/plan/实现计划-M1.md)。
+Pcbot EDA — 以 AI 为设计主体的 PCB EDA 工具，Godot 4.6 承载。**AI 通过 CLI 驱动设计（原理图 → 布局 → 布线 → 审查）；人类通过 GUI 做 review 与手动微调**。GUI 与 CLI 地位对等，GUI 的任何持久化编辑都必须经 `Runtime/modules/<domain>/commands.gd` 注册的 CLI 方法（[ADR-0005](docs/architecture/ADR-0005-gui-as-first-class-edit-surface.md)；ADR-0002 "只读 GUI" 已 superseded）。M1 聚焦：元件库 + 原理图数据模型 + CLI 骨架 + AI 中间文件；M1.2 起 GUI 成为一等编辑面（placement 拖拽 / 旋转 / 删除、wire 连接、属性编辑、CLI 调试面板、Undo/Redo）。详细里程碑范围见 [docs/plan/实现计划-M1.md](docs/plan/实现计划-M1.md) 与 [实现计划-M1.2](docs/plan/实现计划-M1.2-GUI完善.md) / [M1.2.1](docs/plan/实现计划-M1.2.1-GUI修复.md)。
 
 ## 技术栈
 
@@ -24,7 +24,9 @@ Runtime/
   io/         # 纯 I/O：json_stable / yaml / jsonl / svg / project_fs / run_report / diagnostics_log
   modules/    # 领域模块：project, symbol, library, schematic, check, skills, run
               # 每个模块下 commands.gd 注册 CLI 方法，其它是领域数据/算法
-  ui/         # 编辑器 UI（只读渲染为主）：main_window.gd, schematic_view.gd
+  ui/         # 编辑器 UI（M1.2 一等编辑面）：main_window / schematic_view /
+              # properties_panel / library_panel / log_viewer / status_bar /
+              # cli_console / undo_stack。所有编辑走 commands 不绕 Result。
 cli/          # headless 入口：main.gd（SceneTree）+ jsonrpc.gd + command_registry.gd
 Scenes/       # Godot 场景（Main.tscn）
 tests/
@@ -92,6 +94,8 @@ M2 起 CI 挂 `tools/fmt_check.sh` 门禁。
 - **坐标单位**：内部一律 `int64` 纳米（nm）。常量 `NM_PER_MM=1_000_000`、`NM_PER_MIL=25_400`，换算集中在 `Runtime/core/unit_system.gd`。跨模块 API 不得暴露 `float` 坐标，UI/导出层才做浮点转换。
 - **错误处理**：CLI 边界统一 `Result.ok(...)` / `Result.err(code, msg, data?)`，再由 `cli/jsonrpc.gd` 转 JSON-RPC。内部不抛异常穿越模块边界。错误码枚举集中在 `Runtime/core/error.gd`，新增需评审。
 - **日志**：全部经 `Logger`；禁止散落 `print()`（CLI 的 stdout 是 JSON-RPC 响应通道，污染会破坏协议）。
+- **EventBus 信号**：域事件走 `EventBus.emit_domain(name, payload)` 路由（`component.added` / `schematic.net.changed` / `rule.violated` / `run.completed`）；UI 协同信号直发直订阅（如 `schematic_disk_changed(path)`：文件落盘后广播，`SchematicView` 按 path 自行 reload）。新信号加在 `Runtime/core/event_bus.gd`，payload 为不可变 dict 快照。
+- **Undo/Redo**：GUI 侧 `Runtime/ui/undo_stack.gd` 记录 `{forward, inverse}` CLI 命令对；不落盘、不跨工程持久化、切换工程时 `clear()`。编辑命令的 `Result.data` 需返回足够信息让 inverse 可重建（如 `remove_placement` 带 `placement_snapshot` + `net_snapshots`；`connect` 带 `is_new` + `net_id` + `added_pins`）。
 
 ## AI 中间文件（`.pcbot/`）白名单
 
@@ -138,6 +142,7 @@ M2 起 CI 挂 `tools/fmt_check.sh` 门禁。
 4. 对应 `docs/skills/<domain>/<method>.yaml` 更新？
 5. `tests/unit/<mirror>_test.gd` 至少一个 smoke + 一个边界用例？端到端触达 `tests/integration/led_blink_e2e_test.gd`？
 6. 新增持久化文件？先写 ADR（`docs/architecture/ADR-XXXX-*.md`）。
+7. GUI 会触发此命令？`Result.data` 是否足以 build inverse 入 UndoStack？`PropertiesPanel` 等非 view 面板写完后是否 emit `EventBus.schematic_disk_changed(path)`？
 
 ## 参考文档
 
