@@ -1,0 +1,25 @@
+Runtime/ui/cli_console.gd
+  8acdc562671a1ffe 98-100,103-106
+Runtime/ui/schematic_view.gd
+  8acdc562671a1ffe 48,146-150,460-461
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "529393ea30d3e19dc4f3b93a755cb2da0ffef9ce",
+  "prompts": {
+    "8acdc562671a1ffe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7242f3a0-564b-4842-8c08-d556958bf18a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 15,
+      "total_deletions": 7,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}
