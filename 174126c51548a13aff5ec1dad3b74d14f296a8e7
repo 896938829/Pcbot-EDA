@@ -1,0 +1,23 @@
+Runtime/ui/cli_console.gd
+  8acdc562671a1ffe 98-99,102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "174126c51548a13aff5ec1dad3b74d14f296a8e7",
+  "prompts": {
+    "8acdc562671a1ffe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7242f3a0-564b-4842-8c08-d556958bf18a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 2,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
