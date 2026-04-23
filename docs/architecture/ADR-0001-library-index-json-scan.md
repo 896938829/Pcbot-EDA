@@ -2,9 +2,9 @@
 
 | 字段 | 值 |
 | --- | --- |
-| 状态 | accepted |
+| 状态 | accepted（SQLite 切换分支 superseded → [ADR-0008](ADR-0008-library-stay-json.md)） |
 | 日期 | 2026-04-17 |
-| 作用域 | M1 |
+| 作用域 | M1（M2+ 续约：[ADR-0008](ADR-0008-library-stay-json.md)） |
 
 ## 背景
 
@@ -33,6 +33,10 @@ M1 范围内：
 - 不引入任何 SQLite GDExtension 依赖，不动 `addons/`。
 
 ## 触发切换的条件（M2 决策点）
+
+> **注**：本节已被 [ADR-0008](ADR-0008-library-stay-json.md) **superseded**。M2 评审 2026-04-23
+> 否决 SQLite 切换路径；原触发器 1（≥1000 条）不再自动触发，新触发器见 ADR-0008。
+> 以下保留作历史参考。
 
 任一项满足即切回 SQLite：
 
