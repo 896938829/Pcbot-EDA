@@ -26,6 +26,7 @@ var _schematic: Schematic
 var _symbol_cache: Dictionary = {}      ## id → sym dict
 var _texture_cache: Dictionary = {}     ## id → ImageTexture（无纹理则不入）
 var _bbox_cache: Dictionary = {}        ## id → Rect2 in mm（用于纹理缩放定位）
+var _draw_rect_cache: Dictionary = {}   ## uid → Rect2 in px（上一帧真实绘制矩形，供 hit-test）
 var _lib_root: String = ""
 var _sch_path: String = ""               ## 当前原理图文件路径（drop/编辑落盘用）
 var _zoom: float = 1.0
@@ -355,6 +356,14 @@ func _apply_move() -> void:
 func _find_placement_at(px: Vector2) -> Dictionary:
 	if _schematic == null:
 		return {}
+	## 优先走上一帧真实绘制矩形缓存（与 _draw_placements 对齐，消除 hit/draw 错位）。
+	for uid in _draw_rect_cache.keys():
+		var rect: Rect2 = _draw_rect_cache[uid]
+		if rect.has_point(px):
+			var pl_hit: Dictionary = _schematic.find_placement(str(uid))
+			if not pl_hit.is_empty():
+				return pl_hit
+	## 回退：未绘制过（首帧）时按 bbox 兜底。
 	var mm_to_px: float = 1_000_000.0 * WORLD_PER_NM * _zoom
 	for pl in _schematic.placements:
 		var pos: Array = pl.get("pos_nm", [0, 0])
@@ -507,6 +516,7 @@ func _draw_placements() -> void:
 	var font := get_theme_default_font()
 	## mm → 像素的换算（沿用 nm 路径）：mm → nm × WORLD_PER_NM × _zoom
 	var mm_to_px: float = 1_000_000.0 * WORLD_PER_NM * _zoom
+	_draw_rect_cache.clear()
 	for pl in _schematic.placements:
 		var pos: Array = pl.get("pos_nm", [0, 0])
 		var center := _nm_to_px(Vector2i(int(pos[0]), int(pos[1])))
@@ -534,6 +544,9 @@ func _draw_placements() -> void:
 			draw_rect(draw_rect_r.grow(4.0), Color(1.0, 0.55, 0.1), false, 2.0)
 		elif _hovered_uid != "" and str(pl.get("uid", "")) == _hovered_uid:
 			draw_rect(draw_rect_r.grow(3.0), Color(1.0, 0.9, 0.2, 0.8), false, 1.5)
+		var uid_s := str(pl.get("uid", ""))
+		if uid_s != "":
+			_draw_rect_cache[uid_s] = draw_rect_r
 
 
 func _symbol_id_for_component(component_id: String) -> String:
