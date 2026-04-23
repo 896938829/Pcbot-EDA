@@ -52,6 +52,7 @@ const PIN_DOT_RADIUS_PX: float = 3.0
 func _ready() -> void:
 	_build_zoom_overlay()
 	focus_mode = Control.FOCUS_ALL
+	clip_contents = true
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
