@@ -1,0 +1,29 @@
+CLAUDE.md
+  8acdc562671a1ffe 9,27-29,97-98,145
+docs/architecture/架构设计.md
+  8acdc562671a1ffe 8,227-230
+docs/architecture/ADR-0005-gui-as-first-class-edit-surface.md
+  8acdc562671a1ffe 72-97
+docs/architecture/ADR-0002-m1-read-only-gui.md
+  8acdc562671a1ffe 5-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "a64895b701f268557a1c027a130ca1cacf5c2436",
+  "prompts": {
+    "8acdc562671a1ffe": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7242f3a0-564b-4842-8c08-d556958bf18a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 46,
+      "total_deletions": 7,
+      "accepted_lines": 46,
+      "overriden_lines": 0
+    }
+  }
+}
