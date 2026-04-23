@@ -1,0 +1,31 @@
+docs/工程文档.md
+  7aae2c09eb2a56a1 71-72,76
+docs/architecture/ADR-0007-pcb-data-structure.md
+  7aae2c09eb2a56a1 1-169
+docs/architecture/ADR-0001-library-index-json-scan.md
+  7aae2c09eb2a56a1 5,7,37-40
+docs/architecture/ADR-0008-library-stay-json.md
+  7aae2c09eb2a56a1 1-84
+docs/architecture/ADR-0006-fmt-baseline.md
+  7aae2c09eb2a56a1 1-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.13",
+  "base_commit_sha": "746c98ec225302e7a9424594b1565987c986d793",
+  "prompts": {
+    "7aae2c09eb2a56a1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b8971287-c290-4a5a-bdc8-00e1b9c508c3",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "p-Wangsb",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 332,
+      "overriden_lines": 0
+    }
+  }
+}
